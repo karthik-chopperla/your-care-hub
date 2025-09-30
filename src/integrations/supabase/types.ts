@@ -270,6 +270,54 @@ export type Database = {
         }
         Relationships: []
       }
+      medicine_reminders: {
+        Row: {
+          created_at: string
+          dosage: string
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          medicine_name: string
+          next_reminder: string | null
+          notes: string | null
+          reminder_times: string[]
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dosage: string
+          end_date?: string | null
+          frequency: string
+          id?: string
+          is_active?: boolean
+          medicine_name: string
+          next_reminder?: string | null
+          notes?: string | null
+          reminder_times?: string[]
+          start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          medicine_name?: string
+          next_reminder?: string | null
+          notes?: string | null
+          reminder_times?: string[]
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       medicines: {
         Row: {
           created_at: string
