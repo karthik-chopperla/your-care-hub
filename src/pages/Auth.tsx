@@ -44,6 +44,15 @@ const Auth = () => {
           variant: "destructive"
         });
       } else {
+        // Store user info for dashboard use
+        localStorage.setItem('healthmate_user', JSON.stringify({
+          id: Date.now().toString(),
+          full_name: formData.fullName,
+          phone_number: formData.phone,
+          country_code: formData.countryCode,
+          subscription_plan: 'FREE'
+        }));
+        
         toast({
           title: "Success",
           description: "Information saved successfully!"

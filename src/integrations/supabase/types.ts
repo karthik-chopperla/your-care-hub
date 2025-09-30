@@ -14,6 +14,262 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_type: string
+          consultation_notes: string | null
+          created_at: string
+          doctor_id: string | null
+          hospital_id: string | null
+          id: string
+          payment_amount: number | null
+          payment_status: string | null
+          prescription_id: string | null
+          scheduled_at: string
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_type: string
+          consultation_notes?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          hospital_id?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_status?: string | null
+          prescription_id?: string | null
+          scheduled_at: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_type?: string
+          consultation_notes?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          hospital_id?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_status?: string | null
+          prescription_id?: string | null
+          scheduled_at?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctors: {
+        Row: {
+          address: string | null
+          availability: Json | null
+          charges: number | null
+          created_at: string
+          email: string | null
+          experience_years: number | null
+          id: string
+          is_offline_available: boolean | null
+          is_online_available: boolean | null
+          name: string
+          phone_number: string | null
+          qualifications: string | null
+          ratings: number | null
+          specialty: string
+          total_ratings: number | null
+          updated_at: string
+          verification_docs: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          address?: string | null
+          availability?: Json | null
+          charges?: number | null
+          created_at?: string
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          is_offline_available?: boolean | null
+          is_online_available?: boolean | null
+          name: string
+          phone_number?: string | null
+          qualifications?: string | null
+          ratings?: number | null
+          specialty: string
+          total_ratings?: number | null
+          updated_at?: string
+          verification_docs?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          address?: string | null
+          availability?: Json | null
+          charges?: number | null
+          created_at?: string
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          is_offline_available?: boolean | null
+          is_online_available?: boolean | null
+          name?: string
+          phone_number?: string | null
+          qualifications?: string | null
+          ratings?: number | null
+          specialty?: string
+          total_ratings?: number | null
+          updated_at?: string
+          verification_docs?: string | null
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
+      elder_experts: {
+        Row: {
+          availability: Json | null
+          charges: number | null
+          created_at: string
+          email: string | null
+          experience_years: number | null
+          id: string
+          languages: string[] | null
+          name: string
+          phone_number: string | null
+          ratings: number | null
+          specialty: string
+          total_ratings: number | null
+          traditional_medicine_type: string | null
+          updated_at: string
+          verification_status: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          charges?: number | null
+          created_at?: string
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          languages?: string[] | null
+          name: string
+          phone_number?: string | null
+          ratings?: number | null
+          specialty: string
+          total_ratings?: number | null
+          traditional_medicine_type?: string | null
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          charges?: number | null
+          created_at?: string
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          languages?: string[] | null
+          name?: string
+          phone_number?: string | null
+          ratings?: number | null
+          specialty?: string
+          total_ratings?: number | null
+          traditional_medicine_type?: string | null
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
+      hospitals: {
+        Row: {
+          address: string
+          ambulance_available: boolean | null
+          city: string
+          coordinates: Json | null
+          cost_index: string | null
+          created_at: string
+          email: string | null
+          emergency_services: boolean | null
+          facilities: string[] | null
+          general_beds: number | null
+          icu_beds: number | null
+          id: string
+          name: string
+          phone_number: string | null
+          pincode: string | null
+          ratings: number | null
+          state: string
+          success_rate: number | null
+          total_ratings: number | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          ambulance_available?: boolean | null
+          city: string
+          coordinates?: Json | null
+          cost_index?: string | null
+          created_at?: string
+          email?: string | null
+          emergency_services?: boolean | null
+          facilities?: string[] | null
+          general_beds?: number | null
+          icu_beds?: number | null
+          id?: string
+          name: string
+          phone_number?: string | null
+          pincode?: string | null
+          ratings?: number | null
+          state: string
+          success_rate?: number | null
+          total_ratings?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          ambulance_available?: boolean | null
+          city?: string
+          coordinates?: Json | null
+          cost_index?: string | null
+          created_at?: string
+          email?: string | null
+          emergency_services?: boolean | null
+          facilities?: string[] | null
+          general_beds?: number | null
+          icu_beds?: number | null
+          id?: string
+          name?: string
+          phone_number?: string | null
+          pincode?: string | null
+          ratings?: number | null
+          state?: string
+          success_rate?: number | null
+          total_ratings?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medicines: {
         Row: {
           created_at: string
@@ -44,6 +300,110 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          scheduled_for: string | null
+          sent_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sos_events: {
+        Row: {
+          actual_arrival: string | null
+          ambulance_tracking_id: string | null
+          created_at: string
+          estimated_arrival: string | null
+          hospital_id: string | null
+          id: string
+          location: Json
+          notes: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_arrival?: string | null
+          ambulance_tracking_id?: string | null
+          created_at?: string
+          estimated_arrival?: string | null
+          hospital_id?: string | null
+          id?: string
+          location: Json
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_arrival?: string | null
+          ambulance_tracking_id?: string | null
+          created_at?: string
+          estimated_arrival?: string | null
+          hospital_id?: string | null
+          id?: string
+          location?: Json
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sos_events_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sos_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_info: {
         Row: {
           age: number | null
@@ -52,6 +412,7 @@ export type Database = {
           chronic_conditions: string | null
           country_code: string | null
           created_at: string
+          email: string | null
           full_name: string
           gender: string | null
           id: string
@@ -60,6 +421,9 @@ export type Database = {
           phone_number: string
           preferred_medicine: string | null
           role: string | null
+          subscription_end_date: string | null
+          subscription_plan: string | null
+          subscription_start_date: string | null
           updated_at: string
         }
         Insert: {
@@ -69,6 +433,7 @@ export type Database = {
           chronic_conditions?: string | null
           country_code?: string | null
           created_at?: string
+          email?: string | null
           full_name: string
           gender?: string | null
           id?: string
@@ -77,6 +442,9 @@ export type Database = {
           phone_number: string
           preferred_medicine?: string | null
           role?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -86,6 +454,7 @@ export type Database = {
           chronic_conditions?: string | null
           country_code?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string
           gender?: string | null
           id?: string
@@ -94,6 +463,9 @@ export type Database = {
           phone_number?: string
           preferred_medicine?: string | null
           role?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
           updated_at?: string
         }
         Relationships: []
