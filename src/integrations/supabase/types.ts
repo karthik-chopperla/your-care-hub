@@ -254,45 +254,57 @@ export type Database = {
         Row: {
           age: number | null
           allergies: string | null
+          avatar_url: string | null
           chronic_conditions: string | null
+          country_code: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           gender: string | null
           id: string
           medical_history: string | null
-          phone: string | null
+          password_hash: string | null
+          phone_number: string | null
           preferred_medicine: string | null
-          role: string
+          role: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           age?: number | null
           allergies?: string | null
+          avatar_url?: string | null
           chronic_conditions?: string | null
+          country_code?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
           medical_history?: string | null
-          phone?: string | null
+          password_hash?: string | null
+          phone_number?: string | null
           preferred_medicine?: string | null
-          role?: string
+          role?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           age?: number | null
           allergies?: string | null
+          avatar_url?: string | null
           chronic_conditions?: string | null
+          country_code?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
           medical_history?: string | null
-          phone?: string | null
+          password_hash?: string | null
+          phone_number?: string | null
           preferred_medicine?: string | null
-          role?: string
+          role?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -339,7 +351,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_profile_by_user_id: {
+        Args: { user_uuid: string }
+        Returns: {
+          avatar_url: string
+          country_code: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone_number: string
+          role: string
+          user_id: string
+        }[]
+      }
+      set_user_role: {
+        Args: { new_role: string; user_uuid: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

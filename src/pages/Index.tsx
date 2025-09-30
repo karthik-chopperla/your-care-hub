@@ -81,10 +81,10 @@ const Index = () => {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button variant="hero" size="xl" asChild>
-                  <Link to="/auth">Get Started Free</Link>
+                  <Link to="/auth">Sign Up</Link>
                 </Button>
                 <Button variant="outline" size="xl" asChild>
-                  <Link to="/features">Learn More</Link>
+                  <Link to="/auth">Sign In</Link>
                 </Button>
               </div>
               

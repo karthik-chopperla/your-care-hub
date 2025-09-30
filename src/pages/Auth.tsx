@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Phone, Shield, Stethoscope } from "lucide-react";
+import { Heart, Phone, Shield, Stethoscope, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { CountrySelector } from "@/components/CountrySelector";
+import { countries } from "@/data/countries";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +20,22 @@ export default function Auth() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/dashboard');
+        // Check if user has a role, if not redirect to role selection
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (profile?.role) {
+          if (profile.role === 'user') {
+            navigate('/user-dashboard');
+          } else if (profile.role === 'partner') {
+            navigate('/partner-dashboard');
+          }
+        } else {
+          navigate('/role-selection');
+        }
       }
     };
     checkUser();
@@ -26,7 +43,10 @@ export default function Auth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
-          navigate('/dashboard');
+          // Check role and redirect accordingly
+          setTimeout(() => {
+            checkUser();
+          }, 100);
         }
       }
     );
@@ -34,30 +54,67 @@ export default function Auth() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handlePhoneAuth = async (phone: string, password: string, fullName: string, isSignUp: boolean) => {
+  const handleAuth = async (
+    authData: {
+      email?: string;
+      phone?: string;
+      countryCode?: string;
+      password: string;
+      fullName?: string;
+      avatarUrl?: string;
+    },
+    isSignUp: boolean,
+    authType: 'email' | 'phone'
+  ) => {
     setIsLoading(true);
     try {
-      const normalizedPhone = normalizePhoneNumber(phone);
+      let result;
       
-      const { error } = isSignUp 
-        ? await supabase.auth.signUp({
-            phone: normalizedPhone,
-            password,
+      if (authType === 'email') {
+        const authOptions = {
+          email: authData.email!,
+          password: authData.password,
+          ...(isSignUp && {
             options: {
+              emailRedirectTo: `${window.location.origin}/role-selection`,
               data: {
-                full_name: fullName,
+                full_name: authData.fullName,
+                avatar_url: authData.avatarUrl,
               }
             }
           })
-        : await supabase.auth.signInWithPassword({ 
-            phone: normalizedPhone, 
-            password 
-          });
+        };
 
-      if (error) {
+        result = isSignUp
+          ? await supabase.auth.signUp(authOptions)
+          : await supabase.auth.signInWithPassword({
+              email: authData.email!,
+              password: authData.password
+            });
+      } else {
+        const fullPhone = `${authData.countryCode}${authData.phone}`;
+        
+        result = isSignUp 
+          ? await supabase.auth.signUp({
+              phone: fullPhone,
+              password: authData.password,
+              options: {
+                data: {
+                  full_name: authData.fullName,
+                  avatar_url: authData.avatarUrl,
+                }
+              }
+            })
+          : await supabase.auth.signInWithPassword({ 
+              phone: fullPhone, 
+              password: authData.password 
+            });
+      }
+
+      if (result.error) {
         toast({
           title: "Authentication Error",
-          description: error.message,
+          description: result.error.message,
           variant: "destructive",
         });
       } else {
@@ -77,16 +134,6 @@ export default function Auth() {
     }
   };
 
-  const normalizePhoneNumber = (phone: string) => {
-    // Remove all formatting and add country code if needed
-    const digits = phone.replace(/\D/g, '');
-    if (digits.length === 10) {
-      return `+1${digits}`;
-    } else if (digits.length === 11 && digits[0] === '1') {
-      return `+${digits}`;
-    }
-    return `+${digits}`;
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
@@ -100,9 +147,9 @@ export default function Auth() {
 
         <Card className="shadow-strong border-border/50">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Secure Authentication</CardTitle>
+            <CardTitle className="text-2xl font-bold">Welcome to HealthMate</CardTitle>
             <CardDescription>
-              Sign in with your phone number and password - no verification codes needed
+              Sign in with your email or phone number - no verification codes needed
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -114,7 +161,7 @@ export default function Auth() {
               
               <TabsContent value="signin" className="space-y-4">
                 <AuthForm 
-                  onSubmit={(phone, password, fullName) => handlePhoneAuth(phone, password, fullName, false)}
+                  onSubmit={handleAuth}
                   isLoading={isLoading}
                   submitText="Sign In"
                   isSignUp={false}
@@ -123,7 +170,7 @@ export default function Auth() {
               
               <TabsContent value="signup" className="space-y-4">
                 <AuthForm 
-                  onSubmit={(phone, password, fullName) => handlePhoneAuth(phone, password, fullName, true)}
+                  onSubmit={handleAuth}
                   isLoading={isLoading}
                   submitText="Create Account"
                   isSignUp={true}
@@ -152,9 +199,9 @@ export default function Auth() {
           </div>
           <div className="space-y-2">
             <div className="p-3 rounded-lg bg-wellness/10 mx-auto w-fit">
-              <Phone className="h-6 w-6 text-wellness" />
+              <Mail className="h-6 w-6 text-wellness" />
             </div>
-            <p className="text-xs text-muted-foreground">Phone Auth</p>
+            <p className="text-xs text-muted-foreground">Email & Phone</p>
           </div>
           <div className="space-y-2">
             <div className="p-3 rounded-lg bg-urgent/10 mx-auto w-fit">
@@ -169,39 +216,65 @@ export default function Auth() {
 }
 
 interface AuthFormProps {
-  onSubmit: (phone: string, password: string, fullName: string) => void;
+  onSubmit: (
+    authData: {
+      email?: string;
+      phone?: string;
+      countryCode?: string;
+      password: string;
+      fullName?: string;
+      avatarUrl?: string;
+    },
+    isSignUp: boolean,
+    authType: 'email' | 'phone'
+  ) => void;
   isLoading: boolean;
   submitText: string;
   isSignUp: boolean;
 }
 
 function AuthForm({ onSubmit, isLoading, submitText, isSignUp }: AuthFormProps) {
+  const [authType, setAuthType] = useState<'email' | 'phone'>('email');
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default to US
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
-
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
-    const phoneNumber = value.replace(/\D/g, '');
-    
-    // Format as (XXX) XXX-XXXX for US numbers
-    if (phoneNumber.length >= 10) {
-      const areaCode = phoneNumber.slice(0, 3);
-      const firstPart = phoneNumber.slice(3, 6);
-      const secondPart = phoneNumber.slice(6, 10);
-      return `(${areaCode}) ${firstPart}-${secondPart}`;
-    }
-    
-    return value;
-  };
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(phone, password, fullName);
+    
+    if (isSignUp && password !== confirmPassword) {
+      return; // Error handling for password mismatch
+    }
+
+    const authData = {
+      email: authType === 'email' ? email : undefined,
+      phone: authType === 'phone' ? phone : undefined,
+      countryCode: authType === 'phone' ? selectedCountry.dialCode : undefined,
+      password,
+      fullName: isSignUp ? fullName : undefined,
+      avatarUrl: isSignUp ? avatarUrl : undefined,
+    };
+
+    onSubmit(authData, isSignUp, authType);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Auth Type Toggle */}
+      <div className="space-y-2">
+        <Label>Authentication Method</Label>
+        <Tabs value={authType} onValueChange={(value) => setAuthType(value as 'email' | 'phone')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="phone">Phone</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
       {isSignUp && (
         <div className="space-y-2">
           <Label htmlFor="fullName">Full Name</Label>
@@ -215,25 +288,53 @@ function AuthForm({ onSubmit, isLoading, submitText, isSignUp }: AuthFormProps) 
           />
         </div>
       )}
-      
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
-        <div className="relative">
-          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="(555) 123-4567"
-            value={phone}
-            onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
-            className="pl-10"
-            required
-          />
+
+      {/* Email Auth Fields */}
+      {authType === 'email' && (
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-10"
+              required
+            />
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Enter your US phone number with area code
-        </p>
-      </div>
+      )}
+
+      {/* Phone Auth Fields */}
+      {authType === 'phone' && (
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number</Label>
+          <div className="space-y-2">
+            <CountrySelector
+              selectedCountry={selectedCountry}
+              onSelectCountry={setSelectedCountry}
+            />
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="123-456-7890"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Enter your phone number without country code
+          </p>
+        </div>
+      )}
       
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
@@ -252,15 +353,51 @@ function AuthForm({ onSubmit, isLoading, submitText, isSignUp }: AuthFormProps) 
           </p>
         )}
       </div>
+
+      {isSignUp && (
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={6}
+          />
+          {password !== confirmPassword && confirmPassword.length > 0 && (
+            <p className="text-xs text-destructive">Passwords do not match</p>
+          )}
+        </div>
+      )}
+
+      {isSignUp && (
+        <div className="space-y-2">
+          <Label htmlFor="avatarUrl">Avatar URL (Optional)</Label>
+          <Input
+            id="avatarUrl"
+            type="url"
+            placeholder="https://example.com/avatar.jpg"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+          />
+        </div>
+      )}
       
-      <Button type="submit" className="w-full" disabled={isLoading} variant="hero">
+      <Button 
+        type="submit" 
+        className="w-full" 
+        disabled={isLoading || (isSignUp && password !== confirmPassword)} 
+        variant="hero"
+      >
         {isLoading ? "Please wait..." : submitText}
       </Button>
       
       {isSignUp && (
         <p className="text-xs text-center text-muted-foreground">
           By creating an account, you agree to our terms of service and privacy policy.
-          No SMS verification required.
+          No email or SMS verification required.
         </p>
       )}
     </form>
