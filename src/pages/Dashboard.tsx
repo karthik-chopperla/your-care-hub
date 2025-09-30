@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -9,83 +9,10 @@ import {
   Stethoscope, 
   MapPin, 
   Pill,
-  Phone,
-  User,
-  LogOut
+  User
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        
-        // Fetch user profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        setProfile(profileData);
-      } else {
-        navigate('/auth');
-      }
-    };
-
-    getSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session?.user) {
-          setUser(session.user);
-        } else {
-          setUser(null);
-          navigate('/auth');
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signed Out",
-        description: "Successfully signed out",
-      });
-      navigate('/');
-    }
-  };
-
-  if (!user || !profile) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   const quickActions = [
     {
       icon: <Stethoscope className="h-6 w-6" />,
@@ -132,9 +59,6 @@ export default function Dashboard() {
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </header>
@@ -143,10 +67,10 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="bg-gradient-hero rounded-xl p-6 text-white shadow-medium">
           <h1 className="text-2xl font-bold mb-2">
-            Welcome back, {profile.full_name || user.email}!
+            Welcome to HealthMate!
           </h1>
           <p className="text-white/90">
-            Your health journey continues here. How can we help you today?
+            Your health journey starts here. How can we help you today?
           </p>
         </div>
 

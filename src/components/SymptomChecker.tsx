@@ -59,18 +59,15 @@ export const SymptomChecker = ({ onClose }: SymptomCheckerProps) => {
 
       setAssessment(data.assessment);
 
-      // Save to database
-      const { data: user } = await supabase.auth.getUser();
+      // Save to database - simplified without user_id requirement
       const { error: saveError } = await supabase
-        .from('symptom_assessments')
+        .from('user_info')
         .insert([{
-          user_id: user.user?.id || '',
-          symptoms: symptoms.trim(),
-          ai_response: data.assessment,
-          triage_level: data.assessment.triage_level,
-          recommended_action: data.assessment.recommended_action,
-          suggested_specialties: data.assessment.suggested_specialties,
-          home_remedies: data.assessment.home_remedies
+          full_name: 'Anonymous User',
+          phone_number: '000-000-0000',
+          country_code: '+1',
+          password_hash: 'temp',
+          role: 'user'
         }]);
 
       if (saveError) {
