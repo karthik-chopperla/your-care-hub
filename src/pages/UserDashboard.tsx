@@ -22,6 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import MobileNavigation from "@/components/MobileNavigation";
 
 const UserDashboard = () => {
   const [notifications, setNotifications] = useState([]);
@@ -198,7 +199,7 @@ const UserDashboard = () => {
   const currentPlan = userInfo?.subscription_plan || 'FREE';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 pb-20 md:pb-8">
       {/* Header */}
       <header className="border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -397,6 +398,7 @@ const UserDashboard = () => {
           </CardContent>
         </Card>
       </main>
+      <MobileNavigation />
     </div>
   );
 };

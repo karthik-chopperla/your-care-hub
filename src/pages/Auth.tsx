@@ -44,20 +44,38 @@ const Auth = () => {
           variant: "destructive"
         });
       } else {
-        // Store user info for dashboard use
+        // Get the created user ID from the response
+        const { data: userData, error: fetchError } = await supabase
+          .from('user_info')
+          .select('id')
+          .eq('phone_number', formData.phone)
+          .eq('country_code', formData.countryCode)
+          .single();
+
+        if (fetchError) {
+          toast({
+            title: "Error",
+            description: "Failed to retrieve user information",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Store user info for role selection
         localStorage.setItem('healthmate_user', JSON.stringify({
-          id: Date.now().toString(),
+          id: userData.id,
           full_name: formData.fullName,
           phone_number: formData.phone,
           country_code: formData.countryCode,
-          subscription_plan: 'FREE'
+          subscription_plan: 'FREE',
+          role: 'user' // default, will be updated in role selection
         }));
         
         toast({
           title: "Success",
-          description: "Information saved successfully!"
+          description: "Registration successful! Please choose your role."
         });
-        navigate('/user-dashboard');
+        navigate('/role-selection');
       }
     } catch (error: any) {
       toast({
