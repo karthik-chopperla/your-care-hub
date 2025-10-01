@@ -469,6 +469,7 @@ export type Database = {
           phone_number: string
           preferred_medicine: string | null
           role: string | null
+          service_type: string | null
           subscription_end_date: string | null
           subscription_plan: string | null
           subscription_start_date: string | null
@@ -490,6 +491,7 @@ export type Database = {
           phone_number: string
           preferred_medicine?: string | null
           role?: string | null
+          service_type?: string | null
           subscription_end_date?: string | null
           subscription_plan?: string | null
           subscription_start_date?: string | null
@@ -511,6 +513,7 @@ export type Database = {
           phone_number?: string
           preferred_medicine?: string | null
           role?: string | null
+          service_type?: string | null
           subscription_end_date?: string | null
           subscription_plan?: string | null
           subscription_start_date?: string | null
