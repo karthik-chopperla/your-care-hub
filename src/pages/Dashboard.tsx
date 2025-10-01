@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Heart, 
   Calendar, 
@@ -13,30 +14,36 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   const quickActions = [
     {
       icon: <Stethoscope className="h-6 w-6" />,
       title: "Symptom Checker",
       description: "AI-powered health assessment",
       variant: "medical" as const,
+      link: "/symptom-checker",
     },
     {
       icon: <Calendar className="h-6 w-6" />,
       title: "Book Appointment",
       description: "Find and book with doctors",
       variant: "default" as const,
+      link: "/doctors",
     },
     {
       icon: <AlertTriangle className="h-6 w-6" />,
       title: "SOS Emergency",
       description: "Emergency assistance",
       variant: "urgent" as const,
+      link: "/sos",
     },
     {
       icon: <MapPin className="h-6 w-6" />,
       title: "Find Hospitals",
       description: "Nearby healthcare facilities",
       variant: "wellness" as const,
+      link: "/hospitals",
     },
   ];
 
@@ -53,11 +60,15 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/reminders">
+                <Bell className="h-5 w-5" />
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/profile">
+                <User className="h-5 w-5" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -77,7 +88,11 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action, index) => (
-            <Card key={index} className="cursor-pointer hover:shadow-medium transition-all duration-normal hover:-translate-y-1 border-border/50">
+            <Card 
+              key={index} 
+              className="cursor-pointer hover:shadow-medium transition-all duration-normal hover:-translate-y-1 border-border/50"
+              onClick={() => navigate(action.link)}
+            >
               <CardContent className="p-6">
                 <div className="mb-4 p-3 rounded-lg bg-primary/10 w-fit">
                   {action.icon}
@@ -102,8 +117,8 @@ export default function Dashboard() {
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No upcoming appointments</p>
-                <Button variant="outline" className="mt-4">
-                  Book Appointment
+                <Button variant="outline" className="mt-4" asChild>
+                  <Link to="/doctors">Book Appointment</Link>
                 </Button>
               </div>
             </CardContent>
@@ -120,8 +135,8 @@ export default function Dashboard() {
               <div className="text-center py-8 text-muted-foreground">
                 <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No medicine reminders set</p>
-                <Button variant="outline" className="mt-4">
-                  Add Reminder
+                <Button variant="outline" className="mt-4" asChild>
+                  <Link to="/reminders">Add Reminder</Link>
                 </Button>
               </div>
             </CardContent>
