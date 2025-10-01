@@ -15,6 +15,7 @@ import DoctorsPage from "./pages/DoctorsPage";
 import MedicineRemindersPage from "./pages/MedicineRemindersPage";
 import HospitalSearchPage from "./pages/HospitalSearchPage";
 import SOSPage from "./pages/SOSPage";
+import AllServicesPage from "./pages/AllServicesPage";
 import HospitalDataPage from "./pages/partner/HospitalDataPage";
 import SOSAlertsPage from "./pages/partner/SOSAlertsPage";
 import AppointmentsPage from "./pages/partner/AppointmentsPage";
@@ -52,6 +53,8 @@ const App = () => {
             <Route path="/hospitals" element={<HospitalSearchPage />} />
             <Route path="/sos" element={<SOSPage />} />
             <Route path="/reminders" element={<MedicineRemindersPage />} />
+            <Route path="/all-services" element={<AllServicesPage />} />
+            <Route path="/medical-shop" element={<DoctorsPage />} />
             <Route path="/partner-services" element={<PartnerServicesList />} />
             <Route path="/partner/hospital-dashboard" element={<HospitalDashboard />} />
             <Route path="/partner/gynecologist-dashboard" element={<GynecologistDashboard />} />

@@ -17,7 +17,8 @@ import {
   Baby,
   Brain,
   Home,
-  Utensils
+  Utensils,
+  Star
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +30,8 @@ const UserDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [sosActive, setSosActive] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [medicineReminders, setMedicineReminders] = useState([]);
+  const [nearbyMedicalShops, setNearbyMedicalShops] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -75,6 +78,50 @@ const UserDashboard = () => {
       if (appointmentsData) {
         setAppointments(appointmentsData);
       }
+
+      // Load medicine reminders
+      const { data: remindersData } = await supabase
+        .from('medicine_reminders')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('next_reminder', { ascending: true })
+        .limit(3);
+
+      if (remindersData) {
+        setMedicineReminders(remindersData);
+      }
+
+      // Load nearby medical shops
+      const { data: shopsData } = await supabase
+        .from('medical_shops')
+        .select('*')
+        .eq('is_open', true)
+        .limit(3);
+
+      if (shopsData) {
+        setNearbyMedicalShops(shopsData);
+      }
+
+      // Subscribe to real-time updates
+      const reminderChannel = supabase
+        .channel('medicine-reminders-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'medicine_reminders', filter: `user_id=eq.${userId}` }, () => {
+          loadDashboardData(userId);
+        })
+        .subscribe();
+
+      const shopChannel = supabase
+        .channel('medical-shops-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'medical_shops' }, () => {
+          loadDashboardData(userId);
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(reminderChannel);
+        supabase.removeChannel(shopChannel);
+      };
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -162,6 +209,14 @@ const UserDashboard = () => {
       title: "Medicine Reminders",
       description: "Never miss your medication",
       path: "/reminders",
+      color: "bg-red-500/10 text-red-600",
+      buttonVariant: "default"
+    },
+    {
+      icon: <Pill className="h-6 w-6" />,
+      title: "Medical Shop",
+      description: "Order medicines and refills",
+      path: "/medical-shop",
       color: "bg-red-500/10 text-red-600",
       buttonVariant: "default"
     },
@@ -329,13 +384,32 @@ const UserDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-6 text-muted-foreground">
-                <Pill className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No active reminders</p>
-                <Button variant="outline" className="mt-3" onClick={() => navigate('/reminders')}>
-                  Add Reminder
-                </Button>
-              </div>
+              {medicineReminders.length > 0 ? (
+                <div className="space-y-3">
+                  {medicineReminders.map((reminder, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{reminder.medicine_name}</p>
+                        <p className="text-sm text-muted-foreground">{reminder.dosage}</p>
+                      </div>
+                      <Badge variant="outline">
+                        {reminder.next_reminder ? new Date(reminder.next_reminder).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No time'}
+                      </Badge>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/reminders')}>
+                    View All Reminders
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <Pill className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No active reminders</p>
+                  <Button variant="outline" className="mt-3" onClick={() => navigate('/reminders')}>
+                    Add Reminder
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -366,6 +440,82 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Medical Shops Widget */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Pill className="h-5 w-5 text-red-600" />
+              Nearby Medical Shops
+            </CardTitle>
+            <CardDescription>
+              Order medicines and refills from nearby pharmacies
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {nearbyMedicalShops.length > 0 ? (
+              <div className="space-y-3">
+                {nearbyMedicalShops.map((shop, index) => (
+                  <div key={index} className="p-4 bg-muted/50 rounded-lg hover:bg-muted/70 cursor-pointer transition-colors" onClick={() => navigate('/medical-shop')}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">{shop.shop_name}</p>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3" />
+                          {shop.city}, {shop.state}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant={shop.is_open ? "default" : "secondary"}>
+                            {shop.is_open ? "Open" : "Closed"}
+                          </Badge>
+                          {shop.delivery_available && (
+                            <Badge variant="outline">Delivery Available</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                        <span className="text-sm font-medium">{shop.ratings || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Button variant="outline" className="w-full" onClick={() => navigate('/medical-shop')}>
+                  View All Medical Shops
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                <Pill className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No medical shops found</p>
+                <Button variant="outline" className="mt-3" onClick={() => navigate('/medical-shop')}>
+                  Search Medical Shops
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* All Services Quick Access */}
+        <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold mb-2">Explore All Services</h3>
+                <p className="text-white/90">
+                  Access all partner services with real-time updates
+                </p>
+              </div>
+              <Button 
+                variant="secondary"
+                size="lg"
+                onClick={() => navigate('/all-services')}
+              >
+                View All Services
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Subscription Section */}
         <Card>
