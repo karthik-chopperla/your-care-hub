@@ -34,28 +34,20 @@ const UserDashboard = () => {
 
   useEffect(() => {
     // Check if user has access to this dashboard
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth', { replace: true });
-        return;
-      }
+    const userInfo = localStorage.getItem('healthmate_user');
+    if (!userInfo) {
+      navigate('/auth', { replace: true });
+      return;
+    }
+    
+    const user = JSON.parse(userInfo);
+    if (user.role !== 'user') {
+      navigate('/', { replace: true });
+      return;
+    }
 
-      const { data: userInfo } = await supabase
-        .from('user_info')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (!userInfo || userInfo.role !== 'user') {
-        navigate('/', { replace: true });
-        return;
-      }
-
-      setUserInfo(userInfo);
-      loadDashboardData(session.user.id);
-    };
-    checkAuth();
+    setUserInfo(user);
+    loadDashboardData(user.id);
   }, [navigate]);
 
   const loadDashboardData = async (userId: string) => {

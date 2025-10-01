@@ -13,28 +13,17 @@ const RoleSelection = () => {
 
   useEffect(() => {
     // Check if user has already selected a role
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth', { replace: true });
-        return;
+    const userInfo = localStorage.getItem('healthmate_user');
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      if (user.role === 'user') {
+        navigate('/user-dashboard', { replace: true });
+      } else if (user.role === 'partner' && user.service_type) {
+        navigate('/partner-dashboard', { replace: true });
       }
-
-      const { data: userInfo } = await supabase
-        .from('user_info')
-        .select('role, service_type')
-        .eq('id', session.user.id)
-        .single();
-
-      if (userInfo) {
-        if (userInfo.role === 'user') {
-          navigate('/user-dashboard', { replace: true });
-        } else if (userInfo.role === 'partner' && userInfo.service_type) {
-          navigate('/partner-dashboard', { replace: true });
-        }
-      }
-    };
-    checkAuth();
+    } else {
+      navigate('/auth', { replace: true });
+    }
   }, [navigate]);
 
   const partnerTypes = [
@@ -58,21 +47,23 @@ const RoleSelection = () => {
     }
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const userInfo = localStorage.getItem('healthmate_user');
+      if (!userInfo) {
         toast({
           title: "Error",
-          description: "Session expired. Please log in again.",
+          description: "User information not found. Please register again.",
           variant: "destructive"
         });
         navigate('/auth');
         return;
       }
 
+      const user = JSON.parse(userInfo);
+      
       const { error } = await supabase
         .from('user_info')
         .update({ role })
-        .eq('id', session.user.id);
+        .eq('id', user.id);
 
       if (error) {
         toast({
@@ -82,6 +73,9 @@ const RoleSelection = () => {
         });
         return;
       }
+
+      const updatedUser = { ...user, role };
+      localStorage.setItem('healthmate_user', JSON.stringify(updatedUser));
 
       toast({
         title: "Success",
@@ -100,21 +94,23 @@ const RoleSelection = () => {
 
   const handlePartnerTypeSelection = async (serviceType: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const userInfo = localStorage.getItem('healthmate_user');
+      if (!userInfo) {
         toast({
           title: "Error",
-          description: "Session expired. Please log in again.",
+          description: "User information not found. Please register again.",
           variant: "destructive"
         });
         navigate('/auth');
         return;
       }
 
+      const user = JSON.parse(userInfo);
+      
       const { error } = await supabase
         .from('user_info')
         .update({ role: 'partner', service_type: serviceType })
-        .eq('id', session.user.id);
+        .eq('id', user.id);
 
       if (error) {
         toast({
@@ -124,6 +120,9 @@ const RoleSelection = () => {
         });
         return;
       }
+
+      const updatedUser = { ...user, role: 'partner', service_type: serviceType };
+      localStorage.setItem('healthmate_user', JSON.stringify(updatedUser));
 
       toast({
         title: "Success",
