@@ -40,9 +40,9 @@ const PartnerDashboard = () => {
           title: 'Hospital Partner Dashboard',
           subtitle: 'Manage your hospital operations',
           cards: [
-            { icon: Calendar, title: 'Active Appointments', description: 'View and manage bookings', action: 'View Appointments' },
-            { icon: Hospital, title: 'Hospital Data', description: 'Update beds, costs, specialties', action: 'Manage Data' },
-            { icon: BarChart3, title: 'Revenue', description: 'View financial reports', action: 'View Revenue' },
+            { icon: Calendar, title: 'Active Appointments', description: 'View and manage bookings', action: 'View Appointments', path: '/partner/appointments' },
+            { icon: Hospital, title: 'Hospital Data', description: 'Update beds, costs, specialties', action: 'Manage Data', path: '/partner/hospital-data' },
+            { icon: BarChart3, title: 'Revenue', description: 'View financial reports', action: 'View Revenue', path: '/partner/revenue' },
           ]
         };
       case 'elder_expert':
@@ -70,9 +70,9 @@ const PartnerDashboard = () => {
           title: 'Emergency Services Dashboard',
           subtitle: 'SOS response & navigation',
           cards: [
-            { icon: Ambulance, title: 'Active SOS Cases', description: 'Current emergency alerts', action: 'View Cases' },
-            { icon: Navigation, title: 'Navigation', description: 'Live map & routing', action: 'Open Map' },
-            { icon: FileText, title: 'History', description: 'Past emergency responses', action: 'View History' },
+            { icon: Ambulance, title: 'Active SOS Cases', description: 'Current emergency alerts', action: 'View Cases', path: '/partner/sos-alerts' },
+            { icon: Navigation, title: 'Navigation', description: 'Live map & routing', action: 'Open Map', path: '/partner/navigation' },
+            { icon: FileText, title: 'History', description: 'Past emergency responses', action: 'View History', path: '/partner/history' },
           ]
         };
       case 'pharmacist':
@@ -184,7 +184,12 @@ const PartnerDashboard = () => {
                   <CardDescription>{card.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">{card.action}</Button>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => card.path && navigate(card.path)}
+                  >
+                    {card.action}
+                  </Button>
                 </CardContent>
               </Card>
             );
