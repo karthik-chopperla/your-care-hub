@@ -129,7 +129,7 @@ const RoleSelection = () => {
         description: "Partner account created successfully!"
       });
 
-      navigate('/partner-dashboard');
+      navigate('/partner-services');
     } catch (error: any) {
       toast({
         title: "Error",

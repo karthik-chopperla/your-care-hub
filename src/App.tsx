@@ -18,6 +18,8 @@ import SOSPage from "./pages/SOSPage";
 import HospitalDataPage from "./pages/partner/HospitalDataPage";
 import SOSAlertsPage from "./pages/partner/SOSAlertsPage";
 import AppointmentsPage from "./pages/partner/AppointmentsPage";
+import PartnerServicesList from "./pages/PartnerServicesList";
+import HospitalDashboard from "./pages/partner/HospitalDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const App = () => {
             <Route path="/hospitals" element={<HospitalSearchPage />} />
             <Route path="/sos" element={<SOSPage />} />
             <Route path="/reminders" element={<MedicineRemindersPage />} />
+            <Route path="/partner-services" element={<PartnerServicesList />} />
+            <Route path="/partner/hospital-dashboard" element={<HospitalDashboard />} />
             <Route path="/partner/hospital-data" element={<HospitalDataPage />} />
             <Route path="/partner/sos-alerts" element={<SOSAlertsPage />} />
             <Route path="/partner/appointments" element={<AppointmentsPage />} />

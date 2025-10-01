@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      ambulance_partners: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          driver_name: string
+          equipment_available: string[] | null
+          id: string
+          is_available: boolean | null
+          license_number: string | null
+          location: Json
+          partner_id: string | null
+          phone_number: string | null
+          ratings: number | null
+          service_radius: number | null
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+          vehicle_number: string
+          vehicle_type: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          driver_name: string
+          equipment_available?: string[] | null
+          id?: string
+          is_available?: boolean | null
+          license_number?: string | null
+          location: Json
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          service_radius?: number | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          vehicle_number: string
+          vehicle_type?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          driver_name?: string
+          equipment_available?: string[] | null
+          id?: string
+          is_available?: boolean | null
+          license_number?: string | null
+          location?: Json
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          service_radius?: number | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          vehicle_number?: string
+          vehicle_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           appointment_type: string
@@ -151,15 +219,20 @@ export type Database = {
         Row: {
           availability: Json | null
           charges: number | null
+          city: string | null
           created_at: string
           email: string | null
           experience_years: number | null
           id: string
+          is_available: boolean | null
           languages: string[] | null
+          location: Json | null
           name: string
+          partner_id: string | null
           phone_number: string | null
           ratings: number | null
           specialty: string
+          state: string | null
           total_ratings: number | null
           traditional_medicine_type: string | null
           updated_at: string
@@ -168,15 +241,20 @@ export type Database = {
         Insert: {
           availability?: Json | null
           charges?: number | null
+          city?: string | null
           created_at?: string
           email?: string | null
           experience_years?: number | null
           id?: string
+          is_available?: boolean | null
           languages?: string[] | null
+          location?: Json | null
           name: string
+          partner_id?: string | null
           phone_number?: string | null
           ratings?: number | null
           specialty: string
+          state?: string | null
           total_ratings?: number | null
           traditional_medicine_type?: string | null
           updated_at?: string
@@ -185,21 +263,253 @@ export type Database = {
         Update: {
           availability?: Json | null
           charges?: number | null
+          city?: string | null
           created_at?: string
           email?: string | null
           experience_years?: number | null
           id?: string
+          is_available?: boolean | null
           languages?: string[] | null
+          location?: Json | null
           name?: string
+          partner_id?: string | null
           phone_number?: string | null
           ratings?: number | null
           specialty?: string
+          state?: string | null
           total_ratings?: number | null
           traditional_medicine_type?: string | null
           updated_at?: string
           verification_status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "elder_experts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fitness_partners: {
+        Row: {
+          address: string | null
+          available_slots: Json | null
+          certifications: string[] | null
+          city: string | null
+          created_at: string | null
+          email: string | null
+          experience_years: number | null
+          gym_name: string | null
+          id: string
+          is_available: boolean | null
+          location: Json
+          name: string
+          partner_id: string | null
+          phone_number: string | null
+          pricing: Json | null
+          ratings: number | null
+          session_types: string[] | null
+          specializations: string[] | null
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          available_slots?: Json | null
+          certifications?: string[] | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          experience_years?: number | null
+          gym_name?: string | null
+          id?: string
+          is_available?: boolean | null
+          location: Json
+          name: string
+          partner_id?: string | null
+          phone_number?: string | null
+          pricing?: Json | null
+          ratings?: number | null
+          session_types?: string[] | null
+          specializations?: string[] | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          available_slots?: Json | null
+          certifications?: string[] | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          experience_years?: number | null
+          gym_name?: string | null
+          id?: string
+          is_available?: boolean | null
+          location?: Json
+          name?: string
+          partner_id?: string | null
+          phone_number?: string | null
+          pricing?: Json | null
+          ratings?: number | null
+          session_types?: string[] | null
+          specializations?: string[] | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fitness_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gynecologists: {
+        Row: {
+          available_slots: Json | null
+          city: string | null
+          consultation_fee: number | null
+          created_at: string | null
+          email: string | null
+          experience_years: number | null
+          id: string
+          is_available: boolean | null
+          location: Json
+          maternity_packages: Json | null
+          name: string
+          partner_id: string | null
+          phone_number: string | null
+          ratings: number | null
+          specialization: string[] | null
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_slots?: Json | null
+          city?: string | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          is_available?: boolean | null
+          location: Json
+          maternity_packages?: Json | null
+          name: string
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          specialization?: string[] | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_slots?: Json | null
+          city?: string | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          is_available?: boolean | null
+          location?: Json
+          maternity_packages?: Json | null
+          name?: string
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          specialization?: string[] | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gynecologists_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_nursing_partners: {
+        Row: {
+          agency_name: string
+          available_nurses: number | null
+          city: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_available: boolean | null
+          location: Json
+          partner_id: string | null
+          phone_number: string | null
+          pricing: Json | null
+          ratings: number | null
+          service_radius: number | null
+          services_offered: string[] | null
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_name: string
+          available_nurses?: number | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_available?: boolean | null
+          location: Json
+          partner_id?: string | null
+          phone_number?: string | null
+          pricing?: Json | null
+          ratings?: number | null
+          service_radius?: number | null
+          services_offered?: string[] | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_name?: string
+          available_nurses?: number | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_available?: boolean | null
+          location?: Json
+          partner_id?: string | null
+          phone_number?: string | null
+          pricing?: Json | null
+          ratings?: number | null
+          service_radius?: number | null
+          services_offered?: string[] | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_nursing_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hospitals: {
         Row: {
@@ -269,6 +579,239 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      insurance_partners: {
+        Row: {
+          address: string | null
+          agent_name: string
+          city: string | null
+          company_name: string
+          created_at: string | null
+          email: string | null
+          id: string
+          insurance_types: string[] | null
+          is_active: boolean | null
+          license_number: string | null
+          location: Json
+          partner_id: string | null
+          phone_number: string | null
+          ratings: number | null
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          agent_name: string
+          city?: string | null
+          company_name: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          insurance_types?: string[] | null
+          is_active?: boolean | null
+          license_number?: string | null
+          location: Json
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          agent_name?: string
+          city?: string | null
+          company_name?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          insurance_types?: string[] | null
+          is_active?: boolean | null
+          license_number?: string | null
+          location?: Json
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurance_plans: {
+        Row: {
+          coverage_amount: number | null
+          coverage_details: Json | null
+          created_at: string | null
+          eligibility_criteria: string | null
+          id: string
+          is_active: boolean | null
+          partner_id: string | null
+          plan_name: string
+          premium_monthly: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          coverage_amount?: number | null
+          coverage_details?: Json | null
+          created_at?: string | null
+          eligibility_criteria?: string | null
+          id?: string
+          is_active?: boolean | null
+          partner_id?: string | null
+          plan_name: string
+          premium_monthly?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          coverage_amount?: number | null
+          coverage_details?: Json | null
+          created_at?: string | null
+          eligibility_criteria?: string | null
+          id?: string
+          is_active?: boolean | null
+          partner_id?: string | null
+          plan_name?: string
+          premium_monthly?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_plans_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_shops: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string | null
+          delivery_available: boolean | null
+          delivery_radius: number | null
+          email: string | null
+          id: string
+          is_open: boolean | null
+          license_number: string | null
+          location: Json
+          operating_hours: Json | null
+          partner_id: string | null
+          phone_number: string | null
+          ratings: number | null
+          shop_name: string
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_radius?: number | null
+          email?: string | null
+          id?: string
+          is_open?: boolean | null
+          license_number?: string | null
+          location: Json
+          operating_hours?: Json | null
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          shop_name: string
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_radius?: number | null
+          email?: string | null
+          id?: string
+          is_open?: boolean | null
+          license_number?: string | null
+          location?: Json
+          operating_hours?: Json | null
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          shop_name?: string
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_shops_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicine_inventory: {
+        Row: {
+          created_at: string | null
+          expiry_date: string | null
+          generic_name: string | null
+          id: string
+          manufacturer: string | null
+          medicine_name: string
+          price: number
+          shop_id: string | null
+          stock_quantity: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expiry_date?: string | null
+          generic_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          medicine_name: string
+          price: number
+          shop_id?: string | null
+          stock_quantity?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expiry_date?: string | null
+          generic_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          medicine_name?: string
+          price?: number
+          shop_id?: string | null
+          stock_quantity?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_inventory_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "medical_shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medicine_reminders: {
         Row: {
@@ -348,6 +891,130 @@ export type Database = {
         }
         Relationships: []
       }
+      mental_health_partners: {
+        Row: {
+          available_slots: Json | null
+          city: string | null
+          consultation_fee: number | null
+          created_at: string | null
+          email: string | null
+          experience_years: number | null
+          id: string
+          is_available: boolean | null
+          location: Json
+          name: string
+          partner_id: string | null
+          phone_number: string | null
+          ratings: number | null
+          session_duration: number | null
+          specialization: string[] | null
+          state: string | null
+          therapy_types: string[] | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_slots?: Json | null
+          city?: string | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          is_available?: boolean | null
+          location: Json
+          name: string
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          session_duration?: number | null
+          specialization?: string[] | null
+          state?: string | null
+          therapy_types?: string[] | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_slots?: Json | null
+          city?: string | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          email?: string | null
+          experience_years?: number | null
+          id?: string
+          is_available?: boolean | null
+          location?: Json
+          name?: string
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          session_duration?: number | null
+          specialization?: string[] | null
+          state?: string | null
+          therapy_types?: string[] | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mental_health_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          calories: number | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          diet_type: string[] | null
+          id: string
+          is_available: boolean | null
+          item_name: string
+          price: number
+          restaurant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          calories?: number | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          diet_type?: string[] | null
+          id?: string
+          is_available?: boolean | null
+          item_name: string
+          price: number
+          restaurant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          calories?: number | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          diet_type?: string[] | null
+          id?: string
+          is_available?: boolean | null
+          item_name?: string
+          price?: number
+          restaurant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -389,6 +1056,184 @@ export type Database = {
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_bookings: {
+        Row: {
+          booking_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          notes: string | null
+          partner_id: string
+          partner_type: Database["public"]["Enums"]["partner_service_type"]
+          payment_amount: number | null
+          payment_status: string | null
+          scheduled_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          booking_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          notes?: string | null
+          partner_id: string
+          partner_type: Database["public"]["Enums"]["partner_service_type"]
+          payment_amount?: number | null
+          payment_status?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          booking_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          partner_type?: Database["public"]["Enums"]["partner_service_type"]
+          payment_amount?: number | null
+          payment_status?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_notifications: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          partner_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          partner_id?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          partner_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_notifications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "partner_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_notifications_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_partners: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string | null
+          cuisine_types: string[] | null
+          delivery_available: boolean | null
+          delivery_radius: number | null
+          diet_plans: Json | null
+          email: string | null
+          id: string
+          is_open: boolean | null
+          location: Json
+          name: string
+          operating_hours: Json | null
+          partner_id: string | null
+          phone_number: string | null
+          ratings: number | null
+          state: string | null
+          total_ratings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          cuisine_types?: string[] | null
+          delivery_available?: boolean | null
+          delivery_radius?: number | null
+          diet_plans?: Json | null
+          email?: string | null
+          id?: string
+          is_open?: boolean | null
+          location: Json
+          name: string
+          operating_hours?: Json | null
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          cuisine_types?: string[] | null
+          delivery_available?: boolean | null
+          delivery_radius?: number | null
+          diet_plans?: Json | null
+          email?: string | null
+          id?: string
+          is_open?: boolean | null
+          location?: Json
+          name?: string
+          operating_hours?: Json | null
+          partner_id?: string | null
+          phone_number?: string | null
+          ratings?: number | null
+          state?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_partners_partner_id_fkey"
+            columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "user_info"
             referencedColumns: ["id"]
@@ -529,7 +1374,17 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      partner_service_type:
+        | "hospital"
+        | "gynecologist"
+        | "mental_health"
+        | "home_nursing"
+        | "ambulance"
+        | "medical_shop"
+        | "restaurant"
+        | "fitness"
+        | "insurance"
+        | "elder_advice"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -656,6 +1511,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      partner_service_type: [
+        "hospital",
+        "gynecologist",
+        "mental_health",
+        "home_nursing",
+        "ambulance",
+        "medical_shop",
+        "restaurant",
+        "fitness",
+        "insurance",
+        "elder_advice",
+      ],
+    },
   },
 } as const
