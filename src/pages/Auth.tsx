@@ -28,14 +28,16 @@ const Auth = () => {
       // Hash password (simple approach for demo)
       const passwordHash = btoa(formData.password); // Basic encoding for demo
 
-      const { error } = await supabase
+      const { data: userData, error } = await supabase
         .from('user_info')
         .insert({
           full_name: formData.fullName,
           phone_number: formData.phone,
           country_code: formData.countryCode,
           password_hash: passwordHash
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) {
         toast({
@@ -43,23 +45,10 @@ const Auth = () => {
           description: error.message,
           variant: "destructive"
         });
-      } else {
-        // Get the created user ID from the response
-        const { data: userData, error: fetchError } = await supabase
-          .from('user_info')
-          .select('id')
-          .eq('phone_number', formData.phone)
-          .eq('country_code', formData.countryCode)
-          .single();
+        return;
+      }
 
-        if (fetchError) {
-          toast({
-            title: "Error",
-            description: "Failed to retrieve user information",
-            variant: "destructive"
-          });
-          return;
-        }
+      if (userData) {
 
         // Store user info for role selection
         localStorage.setItem('healthmate_user', JSON.stringify({
