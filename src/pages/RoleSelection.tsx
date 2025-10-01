@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,23 @@ const RoleSelection = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showPartnerTypes, setShowPartnerTypes] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already selected a role
+    const userInfo = localStorage.getItem('healthmate_user');
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      if (user.role === 'user') {
+        navigate('/user-dashboard', { replace: true });
+      } else if (user.role === 'partner' && user.service_type) {
+        navigate('/partner-dashboard', { replace: true });
+      }
+      // If partner without service_type, stay on this page
+    } else {
+      // No user info, redirect to auth
+      navigate('/auth', { replace: true });
+    }
+  }, [navigate]);
 
   const partnerTypes = [
     { id: 'hospital', name: 'Hospital Partner', icon: Hospital, description: 'Manage hospital info, beds, costs' },

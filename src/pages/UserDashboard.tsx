@@ -33,8 +33,21 @@ const UserDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check if user has access to this dashboard
+    const userInfo = localStorage.getItem('healthmate_user');
+    if (!userInfo) {
+      navigate('/auth', { replace: true });
+      return;
+    }
+    
+    const user = JSON.parse(userInfo);
+    if (user.role !== 'user') {
+      navigate('/', { replace: true });
+      return;
+    }
+
     loadDashboardData();
-  }, []);
+  }, [navigate]);
 
   const loadDashboardData = async () => {
     try {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,14 +11,29 @@ import { countries } from "@/data/countries";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if user is already registered
+    const userInfo = localStorage.getItem('healthmate_user');
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      if (user.role === 'user') {
+        navigate('/user-dashboard', { replace: true });
+      } else if (user.role === 'partner') {
+        navigate('/partner-dashboard', { replace: true });
+      } else {
+        navigate('/role-selection', { replace: true });
+      }
+    }
+  }, [navigate]);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
     countryCode: '+1',
     password: ''
   });
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

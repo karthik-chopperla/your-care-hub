@@ -12,15 +12,20 @@ const PartnerDashboard = () => {
   const [partnerName, setPartnerName] = useState<string>('');
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo');
+    const userInfo = localStorage.getItem('healthmate_user');
     if (!userInfo) {
-      navigate('/auth');
+      navigate('/auth', { replace: true });
       return;
     }
 
     const parsed = JSON.parse(userInfo);
     if (parsed.role !== 'partner') {
-      navigate('/dashboard');
+      navigate('/', { replace: true });
+      return;
+    }
+
+    if (!parsed.service_type) {
+      navigate('/role-selection', { replace: true });
       return;
     }
 

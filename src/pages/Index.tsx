@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { FeatureCard } from "@/components/FeatureCard";
@@ -12,10 +13,49 @@ import {
   Users,
   Smartphone
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-healthcare.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is already registered and has selected a role
+    const checkUserStatus = async () => {
+      const userInfo = localStorage.getItem('healthmate_user');
+      
+      if (userInfo) {
+        const user = JSON.parse(userInfo);
+        
+        // Verify user still exists in database and get latest role info
+        const { data, error } = await supabase
+          .from('user_info')
+          .select('role, service_type')
+          .eq('id', user.id)
+          .single();
+
+        if (data && !error) {
+          // Update localStorage with latest data
+          const updatedUser = { ...user, role: data.role, service_type: data.service_type };
+          localStorage.setItem('healthmate_user', JSON.stringify(updatedUser));
+
+          // Redirect based on role
+          if (data.role === 'user') {
+            navigate('/user-dashboard', { replace: true });
+          } else if (data.role === 'partner' && data.service_type) {
+            navigate('/partner-dashboard', { replace: true });
+          } else if (data.role === 'partner' && !data.service_type) {
+            // Partner hasn't selected service type yet
+            navigate('/role-selection', { replace: true });
+          }
+          // If role is null, stay on welcome screen
+        }
+      }
+    };
+
+    checkUserStatus();
+  }, [navigate]);
   const features = [
     {
       icon: <Stethoscope className="h-6 w-6 text-primary" />,
