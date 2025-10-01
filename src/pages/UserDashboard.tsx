@@ -34,33 +34,37 @@ const UserDashboard = () => {
 
   useEffect(() => {
     // Check if user has access to this dashboard
-    const userInfo = localStorage.getItem('healthmate_user');
-    if (!userInfo) {
-      navigate('/auth', { replace: true });
-      return;
-    }
-    
-    const user = JSON.parse(userInfo);
-    if (user.role !== 'user') {
-      navigate('/', { replace: true });
-      return;
-    }
-
-    loadDashboardData();
-  }, [navigate]);
-
-  const loadDashboardData = async () => {
-    try {
-      // Load user info from localStorage or recent registration
-      const userData = localStorage.getItem('healthmate_user');
-      if (userData) {
-        setUserInfo(JSON.parse(userData));
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/auth', { replace: true });
+        return;
       }
 
-      // Load notifications
+      const { data: userInfo } = await supabase
+        .from('user_info')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!userInfo || userInfo.role !== 'user') {
+        navigate('/', { replace: true });
+        return;
+      }
+
+      setUserInfo(userInfo);
+      loadDashboardData(session.user.id);
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const loadDashboardData = async (userId: string) => {
+    try {
+      // Load notifications for this user
       const { data: notificationsData } = await supabase
         .from('notifications')
         .select('*')
+        .eq('user_id', userId)
         .limit(5)
         .order('created_at', { ascending: false });
 
@@ -68,10 +72,11 @@ const UserDashboard = () => {
         setNotifications(notificationsData);
       }
 
-      // Load upcoming appointments
+      // Load upcoming appointments for this user
       const { data: appointmentsData } = await supabase
         .from('appointments')
         .select('*, doctors(name, specialty)')
+        .eq('user_id', userId)
         .limit(3)
         .order('scheduled_at', { ascending: true });
 

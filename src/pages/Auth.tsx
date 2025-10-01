@@ -15,18 +15,29 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already registered
-    const userInfo = localStorage.getItem('healthmate_user');
-    if (userInfo) {
-      const user = JSON.parse(userInfo);
-      if (user.role === 'user') {
-        navigate('/user-dashboard', { replace: true });
-      } else if (user.role === 'partner') {
-        navigate('/partner-dashboard', { replace: true });
-      } else {
-        navigate('/role-selection', { replace: true });
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Fetch user info to check role
+        const { data: userInfo } = await supabase
+          .from('user_info')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userInfo) {
+          if (userInfo.role === 'user') {
+            navigate('/user-dashboard', { replace: true });
+          } else if (userInfo.role === 'partner') {
+            navigate('/partner-dashboard', { replace: true });
+          } else {
+            navigate('/role-selection', { replace: true });
+          }
+        }
       }
-    }
+    };
+    checkAuth();
   }, [navigate]);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -40,41 +51,56 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Hash password (simple approach for demo)
-      const passwordHash = btoa(formData.password); // Basic encoding for demo
+      // Create a temporary email from phone number for authentication
+      const email = `${formData.countryCode}${formData.phone}@healthmate.app`;
 
-      const { data: userData, error } = await supabase
-        .from('user_info')
-        .insert({
-          full_name: formData.fullName,
-          phone_number: formData.phone,
-          country_code: formData.countryCode,
-          password_hash: passwordHash
-        })
-        .select('id')
-        .single();
+      // Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: formData.fullName,
+            phone_number: formData.phone,
+            country_code: formData.countryCode,
+          }
+        }
+      });
 
-      if (error) {
+      if (authError) {
         toast({
           title: "Error",
-          description: error.message,
+          description: authError.message,
           variant: "destructive"
         });
         return;
       }
 
-      if (userData) {
+      if (authData.user) {
+        // Create user profile in user_info table
+        const { error: profileError } = await supabase
+          .from('user_info')
+          .insert({
+            id: authData.user.id,
+            full_name: formData.fullName,
+            phone_number: formData.phone,
+            country_code: formData.countryCode,
+            password_hash: btoa(formData.password), // Store for reference
+            email: email,
+            subscription_plan: 'FREE',
+            role: 'user'
+          });
 
-        // Store user info for role selection
-        localStorage.setItem('healthmate_user', JSON.stringify({
-          id: userData.id,
-          full_name: formData.fullName,
-          phone_number: formData.phone,
-          country_code: formData.countryCode,
-          subscription_plan: 'FREE',
-          role: 'user' // default, will be updated in role selection
-        }));
-        
+        if (profileError) {
+          toast({
+            title: "Error",
+            description: profileError.message,
+            variant: "destructive"
+          });
+          return;
+        }
+
         toast({
           title: "Success",
           description: "Registration successful! Please choose your role."
