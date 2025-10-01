@@ -20,6 +20,15 @@ import SOSAlertsPage from "./pages/partner/SOSAlertsPage";
 import AppointmentsPage from "./pages/partner/AppointmentsPage";
 import PartnerServicesList from "./pages/PartnerServicesList";
 import HospitalDashboard from "./pages/partner/HospitalDashboard";
+import GynecologistDashboard from "./pages/partner/GynecologistDashboard";
+import MentalHealthDashboard from "./pages/partner/MentalHealthDashboard";
+import HomeNursingDashboard from "./pages/partner/HomeNursingDashboard";
+import AmbulanceDashboard from "./pages/partner/AmbulanceDashboard";
+import MedicalShopDashboard from "./pages/partner/MedicalShopDashboard";
+import RestaurantDashboard from "./pages/partner/RestaurantDashboard";
+import FitnessDashboard from "./pages/partner/FitnessDashboard";
+import InsuranceDashboard from "./pages/partner/InsuranceDashboard";
+import ElderAdviceDashboard from "./pages/partner/ElderAdviceDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +54,15 @@ const App = () => {
             <Route path="/reminders" element={<MedicineRemindersPage />} />
             <Route path="/partner-services" element={<PartnerServicesList />} />
             <Route path="/partner/hospital-dashboard" element={<HospitalDashboard />} />
+            <Route path="/partner/gynecologist-dashboard" element={<GynecologistDashboard />} />
+            <Route path="/partner/mental-health-dashboard" element={<MentalHealthDashboard />} />
+            <Route path="/partner/home-nursing-dashboard" element={<HomeNursingDashboard />} />
+            <Route path="/partner/ambulance-dashboard" element={<AmbulanceDashboard />} />
+            <Route path="/partner/medical-shop-dashboard" element={<MedicalShopDashboard />} />
+            <Route path="/partner/restaurant-dashboard" element={<RestaurantDashboard />} />
+            <Route path="/partner/fitness-dashboard" element={<FitnessDashboard />} />
+            <Route path="/partner/insurance-dashboard" element={<InsuranceDashboard />} />
+            <Route path="/partner/elder-advice-dashboard" element={<ElderAdviceDashboard />} />
             <Route path="/partner/hospital-data" element={<HospitalDataPage />} />
             <Route path="/partner/sos-alerts" element={<SOSAlertsPage />} />
             <Route path="/partner/appointments" element={<AppointmentsPage />} />
