@@ -17,6 +17,10 @@ import HospitalSearchPage from "./pages/HospitalSearchPage";
 import SOSPage from "./pages/SOSPage";
 import AllServicesPage from "./pages/AllServicesPage";
 import MedicalShopPage from "./pages/MedicalShopPage";
+import PregnancyCarePage from "./pages/PregnancyCarePage";
+import HomeNursingPage from "./pages/HomeNursingPage";
+import MentalHealthPage from "./pages/MentalHealthPage";
+import InsurancePage from "./pages/InsurancePage";
 import HospitalDataPage from "./pages/partner/HospitalDataPage";
 import SOSAlertsPage from "./pages/partner/SOSAlertsPage";
 import AppointmentsPage from "./pages/partner/AppointmentsPage";
@@ -71,9 +75,13 @@ const App = () => {
             <Route path="/partner/sos-alerts" element={<SOSAlertsPage />} />
             <Route path="/partner/appointments" element={<AppointmentsPage />} />
             <Route path="/elder-experts" element={<DoctorsPage />} />
-            <Route path="/mental-health" element={<DoctorsPage />} />
-            <Route path="/pregnancy-care" element={<DoctorsPage />} />
-            <Route path="/home-nursing" element={<DoctorsPage />} />
+            <Route path="/mental-health" element={<MentalHealthPage />} />
+            <Route path="/pregnancy-care" element={<PregnancyCarePage />} />
+            <Route path="/home-nursing" element={<HomeNursingPage />} />
+            <Route path="/diet-plans" element={<DoctorsPage />} />
+            <Route path="/fitness" element={<DoctorsPage />} />
+            <Route path="/insurance" element={<InsurancePage />} />
+            <Route path="/home-nursing" element={<HomeNursingPage />} />
             <Route path="/diet-plans" element={<DoctorsPage />} />
             <Route path="/fitness" element={<DoctorsPage />} />
             <Route path="/insurance" element={<DoctorsPage />} />
