@@ -21,7 +21,7 @@ const MentalHealthPage = () => {
   const [moodEntries, setMoodEntries] = useState([]);
   const [currentMood, setCurrentMood] = useState(5);
   const [moodNote, setMoodNote] = useState("");
-  const [assessmentAnswers, setAssessmentAnswers] = useState({});
+  const [assessmentAnswers, setAssessmentAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -168,25 +168,11 @@ const MentalHealthPage = () => {
   };
 
   const submitAssessment = () => {
-    const totalScore = Object.values(assessmentAnswers).reduce((sum: number, val: any) => sum + (val || 0), 0);
+    const totalScore = Object.values(assessmentAnswers).reduce((sum: number, val: unknown): number => {
+      return sum + (typeof val === 'number' ? val : 0);
+    }, 0);
     const maxScore = assessmentQuestions.length * 10;
-    const percentage = (totalScore / maxScore) * 100;
-
-    let message = "";
-    if (percentage >= 70) {
-      message = "Your assessment shows positive mental health. Keep up the good self-care!";
-    } else if (percentage >= 40) {
-      message = "Your assessment shows some areas of concern. Consider booking a session with a therapist.";
-    } else {
-      message = "Your assessment indicates you may benefit from professional support. We recommend booking a session soon.";
-    }
-
-    toast({
-      title: "Assessment Complete",
-      description: message,
-      duration: 5000
-    });
-  };
+    const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
 
     let message = "";
     if (percentage >= 70) {
