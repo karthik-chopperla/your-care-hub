@@ -43,11 +43,10 @@ const DoctorsPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load doctors
+      // Load doctors from public view with masked contact info
       const { data: doctorsData } = await supabase
-        .from('doctors')
+        .from('doctors_public_view')
         .select('*')
-        .eq('verification_status', 'verified')
         .order('ratings', { ascending: false });
 
       // Load hospitals
