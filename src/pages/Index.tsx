@@ -21,35 +21,32 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already registered and has selected a role
     const checkUserStatus = async () => {
-      const userInfo = localStorage.getItem('healthmate_user');
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (userInfo) {
-        const user = JSON.parse(userInfo);
-        
-        // Verify user still exists in database and get latest role info
-        const { data, error } = await supabase
-          .from('user_info')
-          .select('role, service_type')
-          .eq('id', user.id)
+      if (session) {
+        // Check user's role
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
           .single();
 
-        if (data && !error) {
-          // Update localStorage with latest data
-          const updatedUser = { ...user, role: data.role, service_type: data.service_type };
-          localStorage.setItem('healthmate_user', JSON.stringify(updatedUser));
+        if (roles?.role === 'user') {
+          navigate('/user-dashboard', { replace: true });
+        } else if (roles?.role === 'partner') {
+          // Check if partner has selected service type
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('service_type')
+            .eq('id', session.user.id)
+            .single();
 
-          // Redirect based on role
-          if (data.role === 'user') {
-            navigate('/user-dashboard', { replace: true });
-          } else if (data.role === 'partner' && data.service_type) {
+          if (profile?.service_type) {
             navigate('/partner-dashboard', { replace: true });
-          } else if (data.role === 'partner' && !data.service_type) {
-            // Partner hasn't selected service type yet
+          } else {
             navigate('/role-selection', { replace: true });
           }
-          // If role is null, stay on welcome screen
         }
       }
     };

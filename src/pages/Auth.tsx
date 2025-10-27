@@ -8,75 +8,90 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { CountrySelector } from "@/components/CountrySelector";
 import { countries } from "@/data/countries";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already registered
-    const userInfo = localStorage.getItem('healthmate_user');
-    if (userInfo) {
-      const user = JSON.parse(userInfo);
-      if (user.role === 'user') {
-        navigate('/user-dashboard', { replace: true });
-      } else if (user.role === 'partner') {
-        navigate('/partner-dashboard', { replace: true });
-      } else {
-        navigate('/role-selection', { replace: true });
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Check if they have a role assigned
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (roles?.role) {
+          if (roles.role === 'user') {
+            navigate('/user-dashboard', { replace: true });
+          } else if (roles.role === 'partner') {
+            navigate('/partner-dashboard', { replace: true });
+          }
+        } else {
+          navigate('/role-selection', { replace: true });
+        }
       }
-    }
+    };
+    checkUser();
   }, [navigate]);
-  const [formData, setFormData] = useState({
+
+  const [signupData, setSignupData] = useState({
     fullName: '',
+    email: '',
     phone: '',
     countryCode: '+1',
     password: ''
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Hash password (simple approach)
-      const passwordHash = btoa(formData.password);
+      const { data, error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: signupData.fullName,
+            phone_number: signupData.phone,
+            country_code: signupData.countryCode
+          }
+        }
+      });
 
-      const { data: userData, error } = await supabase
-        .from('user_info')
-        .insert({
-          full_name: formData.fullName,
-          phone_number: formData.phone,
-          country_code: formData.countryCode,
-          password_hash: passwordHash
-        })
-        .select('id, full_name, phone_number, country_code')
-        .single();
+      if (error) throw error;
 
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
+      if (data.user) {
+        // Update profile with additional info
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: signupData.fullName,
+            phone_number: signupData.phone,
+            country_code: signupData.countryCode,
+            email: signupData.email
+          })
+          .eq('id', data.user.id);
 
-      if (userData) {
-        // Store user info for role selection
-        localStorage.setItem('healthmate_user', JSON.stringify({
-          id: userData.id,
-          full_name: userData.full_name,
-          phone_number: userData.phone_number,
-          country_code: userData.country_code,
-          subscription_plan: 'FREE',
-          role: null // Will be set in role selection
-        }));
-        
+        if (profileError) console.error('Profile update error:', profileError);
+
         toast({
           title: "Success",
-          description: "Registration successful! Please choose your role."
+          description: "Account created! Please choose your role."
         });
         navigate('/role-selection');
       }
@@ -91,79 +106,181 @@ const Auth = () => {
     }
   };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Check user's role
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (roles?.role === 'user') {
+          navigate('/user-dashboard');
+        } else if (roles?.role === 'partner') {
+          navigate('/partner-dashboard');
+        } else {
+          navigate('/role-selection');
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Invalid email or password",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <div className="container flex min-h-screen items-center justify-center">
+      <div className="container flex min-h-screen items-center justify-center py-8">
         <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-          {/* Welcome Section */}
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Welcome to HealthMate
             </h1>
             <p className="text-sm text-muted-foreground">
-              Save your information to get started
+              Sign up or login to get started
             </p>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Register Your Information</CardTitle>
-              <CardDescription>
-                Enter your details to save them securely
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                    required
-                  />
-                </div>
+          <Tabs defaultValue="signup" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="login">Login</TabsTrigger>
+            </TabsList>
 
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <CountrySelector
-                    selectedCountry={countries.find(c => c.dialCode === formData.countryCode) || countries[0]}
-                    onSelectCountry={(country) => setFormData(prev => ({ ...prev, countryCode: country.dialCode }))}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    required
-                  />
-                </div>
+            <TabsContent value="signup">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create Account</CardTitle>
+                  <CardDescription>
+                    Enter your details to create a new account
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={signupData.fullName}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
+                        required
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    required
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={signupData.email}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                      />
+                    </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Saving..." : "Save Information"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                    <div className="space-y-2">
+                      <Label htmlFor="country">Country</Label>
+                      <CountrySelector
+                        selectedCountry={countries.find(c => c.dialCode === signupData.countryCode) || countries[0]}
+                        onSelectCountry={(country) => setSignupData(prev => ({ ...prev, countryCode: country.dialCode }))}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        value={signupData.phone}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, phone: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password (min 6 characters)"
+                        value={signupData.password}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating Account..." : "Sign Up"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="login">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Login</CardTitle>
+                  <CardDescription>
+                    Enter your credentials to access your account
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="loginEmail">Email</Label>
+                      <Input
+                        id="loginEmail"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={loginData.email}
+                        onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="loginPassword">Password</Label>
+                      <Input
+                        id="loginPassword"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={loginData.password}
+                        onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Logging in..." : "Login"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

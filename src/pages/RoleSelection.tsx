@@ -12,18 +12,34 @@ const RoleSelection = () => {
   const [showPartnerTypes, setShowPartnerTypes] = useState(false);
 
   useEffect(() => {
-    // Check if user has already selected a role
-    const userInfo = localStorage.getItem('healthmate_user');
-    if (userInfo) {
-      const user = JSON.parse(userInfo);
-      if (user.role === 'user') {
-        navigate('/user-dashboard', { replace: true });
-      } else if (user.role === 'partner' && user.service_type) {
-        navigate('/partner-dashboard', { replace: true });
+    const checkUserRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/auth', { replace: true });
+        return;
       }
-    } else {
-      navigate('/auth', { replace: true });
-    }
+
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (roles?.role === 'user') {
+        navigate('/user-dashboard', { replace: true });
+      } else if (roles?.role === 'partner') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('service_type')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profile?.service_type) {
+          navigate('/partner-dashboard', { replace: true });
+        }
+      }
+    };
+    checkUserRole();
   }, [navigate]);
 
   const partnerTypes = [
@@ -47,35 +63,33 @@ const RoleSelection = () => {
     }
 
     try {
-      const userInfo = localStorage.getItem('healthmate_user');
-      if (!userInfo) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         toast({
           title: "Error",
-          description: "User information not found. Please register again.",
+          description: "Session expired. Please login again.",
           variant: "destructive"
         });
         navigate('/auth');
         return;
       }
 
-      const user = JSON.parse(userInfo);
-      
-      const { error } = await supabase
-        .from('user_info')
-        .update({ role })
-        .eq('id', user.id);
+      // Insert role into user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ 
+          user_id: session.user.id, 
+          role: role as 'user' | 'partner' | 'admin'
+        });
 
-      if (error) {
+      if (roleError && !roleError.message.includes('duplicate')) {
         toast({
           title: "Error",
-          description: error.message,
+          description: roleError.message,
           variant: "destructive"
         });
         return;
       }
-
-      const updatedUser = { ...user, role };
-      localStorage.setItem('healthmate_user', JSON.stringify(updatedUser));
 
       toast({
         title: "Success",
@@ -94,35 +108,48 @@ const RoleSelection = () => {
 
   const handlePartnerTypeSelection = async (serviceType: string) => {
     try {
-      const userInfo = localStorage.getItem('healthmate_user');
-      if (!userInfo) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         toast({
           title: "Error",
-          description: "User information not found. Please register again.",
+          description: "Session expired. Please login again.",
           variant: "destructive"
         });
         navigate('/auth');
         return;
       }
 
-      const user = JSON.parse(userInfo);
-      
-      const { error } = await supabase
-        .from('user_info')
-        .update({ role: 'partner', service_type: serviceType })
-        .eq('id', user.id);
+      // Insert partner role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ 
+          user_id: session.user.id, 
+          role: 'partner'
+        });
 
-      if (error) {
+      if (roleError && !roleError.message.includes('duplicate')) {
         toast({
           title: "Error",
-          description: error.message,
+          description: roleError.message,
           variant: "destructive"
         });
         return;
       }
 
-      const updatedUser = { ...user, role: 'partner', service_type: serviceType };
-      localStorage.setItem('healthmate_user', JSON.stringify(updatedUser));
+      // Update profile with service type
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ service_type: serviceType })
+        .eq('id', session.user.id);
+
+      if (profileError) {
+        toast({
+          title: "Error",
+          description: profileError.message,
+          variant: "destructive"
+        });
+        return;
+      }
 
       toast({
         title: "Success",

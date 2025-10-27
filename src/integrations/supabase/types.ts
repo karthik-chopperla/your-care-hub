@@ -1203,6 +1203,63 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          age: number | null
+          allergies: string | null
+          avatar_url: string | null
+          chronic_conditions: string | null
+          country_code: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          gender: string | null
+          id: string
+          medical_history: string | null
+          phone_number: string | null
+          preferred_medicine: string | null
+          service_type: string | null
+          subscription_plan: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age?: number | null
+          allergies?: string | null
+          avatar_url?: string | null
+          chronic_conditions?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          gender?: string | null
+          id: string
+          medical_history?: string | null
+          phone_number?: string | null
+          preferred_medicine?: string | null
+          service_type?: string | null
+          subscription_plan?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age?: number | null
+          allergies?: string | null
+          avatar_url?: string | null
+          chronic_conditions?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          gender?: string | null
+          id?: string
+          medical_history?: string | null
+          phone_number?: string | null
+          preferred_medicine?: string | null
+          service_type?: string | null
+          subscription_plan?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       restaurant_partners: {
         Row: {
           address: string | null
@@ -1403,6 +1460,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       doctors_public_view: {
@@ -1467,9 +1548,16 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "user" | "partner" | "admin"
       partner_service_type:
         | "hospital"
         | "gynecologist"
@@ -1608,6 +1696,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["user", "partner", "admin"],
       partner_service_type: [
         "hospital",
         "gynecologist",
