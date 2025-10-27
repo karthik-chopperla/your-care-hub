@@ -137,6 +137,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_hospital_id_fkey"
             columns: ["hospital_id"]
             isOneToOne: false
@@ -151,6 +158,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      doctor_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          receiver_id: string
+          sender_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          receiver_id: string
+          sender_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          receiver_id?: string
+          sender_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       doctors: {
         Row: {
@@ -1368,7 +1405,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      doctors_public_view: {
+        Row: {
+          availability: Json | null
+          charges: number | null
+          created_at: string | null
+          experience_years: number | null
+          id: string | null
+          is_offline_available: boolean | null
+          is_online_available: boolean | null
+          masked_address: string | null
+          masked_email: string | null
+          masked_phone: string | null
+          name: string | null
+          qualifications: string | null
+          ratings: number | null
+          specialty: string | null
+          total_ratings: number | null
+          updated_at: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          charges?: number | null
+          created_at?: string | null
+          experience_years?: number | null
+          id?: string | null
+          is_offline_available?: boolean | null
+          is_online_available?: boolean | null
+          masked_address?: never
+          masked_email?: never
+          masked_phone?: never
+          name?: string | null
+          qualifications?: string | null
+          ratings?: number | null
+          specialty?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          charges?: number | null
+          created_at?: string | null
+          experience_years?: number | null
+          id?: string | null
+          is_offline_available?: boolean | null
+          is_online_available?: boolean | null
+          masked_address?: never
+          masked_email?: never
+          masked_phone?: never
+          name?: string | null
+          qualifications?: string | null
+          ratings?: number | null
+          specialty?: string | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
