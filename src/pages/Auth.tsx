@@ -51,8 +51,7 @@ const Auth = () => {
     phone: '',
     countryCode: '+1',
     password: '',
-    confirmPassword: '',
-    role: 'user' as 'user' | 'partner'
+    confirmPassword: ''
   });
 
   const [loginData, setLoginData] = useState({
@@ -133,27 +132,13 @@ const Auth = () => {
 
         if (profileError) console.error('Profile update error:', profileError);
 
-        // Assign role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: data.user.id,
-            role: signupData.role
-          });
-
-        if (roleError) console.error('Role assignment error:', roleError);
-
         toast({
           title: "Success",
           description: "Account created successfully!"
         });
 
-        // Navigate based on role
-        if (signupData.role === 'user') {
-          navigate('/user-dashboard');
-        } else {
-          navigate('/partner-dashboard');
-        }
+        // Always redirect to role selection after signup
+        navigate('/role-selection');
       }
     } catch (error: any) {
       toast({
@@ -510,18 +495,6 @@ const Auth = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="role" className="text-base">Role</Label>
-                    <Select value={signupData.role} onValueChange={(value: 'user' | 'partner') => setSignupData(prev => ({ ...prev, role: value }))}>
-                      <SelectTrigger className="h-12 text-base">
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user" className="text-base">User</SelectItem>
-                        <SelectItem value="partner" className="text-base">Partner (Doctor/Hospital/Service Provider)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                     {isLoading ? "Creating Account..." : "Sign Up"}

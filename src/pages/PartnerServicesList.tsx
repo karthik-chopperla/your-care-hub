@@ -2,6 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import MobileLayout from "@/components/MobileLayout";
+import MobileHeader from "@/components/MobileHeader";
 import { 
   Building2, 
   Baby, 
@@ -113,19 +116,27 @@ export default function PartnerServicesList() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const healthmateUser = localStorage.getItem("healthmate_user");
-    if (!healthmateUser) {
-      navigate("/auth");
-      return;
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
 
-    const userData = JSON.parse(healthmateUser);
-    if (userData.role !== "partner") {
-      navigate("/user-dashboard");
-      return;
-    }
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
 
-    setUser(userData);
+      if (roles?.role !== 'partner') {
+        navigate("/user-dashboard");
+        return;
+      }
+
+      setUser(session.user);
+    };
+    checkAuth();
   }, [navigate]);
 
   const handleServiceClick = (service: typeof partnerServices[0]) => {
@@ -135,39 +146,45 @@ export default function PartnerServicesList() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Partner Services</h1>
-          <p className="text-muted-foreground">Choose a service type to manage your business</p>
+    <MobileLayout showNavigation={false}>
+      <MobileHeader title="Partner Services" showBack={false} showNotifications={false} />
+      
+      <div className="px-4 py-6 space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold">Partner Services</h1>
+          <p className="text-sm text-muted-foreground">
+            Choose a service type to manage your business
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
           {partnerServices.map((service) => {
             const Icon = service.icon;
             return (
-              <Card 
-                key={service.id} 
-                className="hover:shadow-lg transition-shadow cursor-pointer group"
-                onClick={() => handleServiceClick(service)}
-              >
-                <CardHeader>
-                  <div className={`w-16 h-16 ${service.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <Icon className={`w-8 h-8 ${service.color}`} />
+              <div key={service.id} className="mobile-card">
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-xl ${service.bgColor} shrink-0`}>
+                      <Icon className={`h-6 w-6 ${service.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground">{service.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+                    </div>
                   </div>
-                  <CardTitle>{service.title}</CardTitle>
-                  <CardDescription>{service.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    onClick={() => handleServiceClick(service)}
+                    className="w-full"
+                    size="lg"
+                  >
                     Open Dashboard
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
-    </div>
+    </MobileLayout>
   );
 }
