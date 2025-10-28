@@ -11,6 +11,9 @@ import { countries } from "@/data/countries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MobileLayout from "@/components/MobileLayout";
+import MobileHeader from "@/components/MobileHeader";
+import { Heart } from "lucide-react";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -266,16 +269,17 @@ const Auth = () => {
 
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <div className="container flex min-h-screen items-center justify-center py-8">
-          <Card className="w-full max-w-lg">
-            <CardHeader>
-              <CardTitle>Forgot Password</CardTitle>
-              <CardDescription>
-                Enter your email to receive a password reset link
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+      <MobileLayout showNavigation={false}>
+        <MobileHeader title="Forgot Password" showBack={true} showNotifications={false} />
+        <div className="px-4 py-6">
+          <div className="mobile-card">
+            <div className="p-6 space-y-4">
+              <div className="text-center space-y-2">
+                <h2 className="text-xl font-bold">Reset Password</h2>
+                <p className="text-sm text-muted-foreground">
+                  Enter your email to receive a password reset link
+                </p>
+              </div>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="forgotEmail">Email Address</Label>
@@ -286,236 +290,249 @@ const Auth = () => {
                     value={forgotPasswordEmail}
                     onChange={(e) => setForgotPasswordEmail(e.target.value)}
                     required
+                    className="h-12"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                   {isLoading ? "Sending..." : "Send Reset Link"}
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
+                  size="lg"
                   className="w-full"
                   onClick={() => setShowForgotPassword(false)}
                 >
                   Back to Login
                 </Button>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-      </div>
+      </MobileLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <div className="container flex min-h-screen items-center justify-center py-8">
-        <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Welcome to HealthMate
+    <MobileLayout showNavigation={false} className="overflow-y-auto">
+      <div className="px-4 py-6 space-y-6">
+        {/* Logo and Title */}
+        <div className="flex flex-col items-center space-y-4 py-4">
+          <div className="p-3 bg-gradient-hero rounded-2xl">
+            <Heart className="h-10 w-10 text-white" />
+          </div>
+          <div className="text-center space-y-1">
+            <h1 className="text-2xl font-bold">
+              Welcome to Health Mate
             </h1>
             <p className="text-sm text-muted-foreground">
               Your complete healthcare companion
             </p>
           </div>
+        </div>
 
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-12">
+            <TabsTrigger value="login" className="text-base">Login</TabsTrigger>
+            <TabsTrigger value="signup" className="text-base">Sign Up</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="login">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Login</CardTitle>
-                  <CardDescription>
+          <TabsContent value="login" className="mt-6">
+            <div className="mobile-card">
+              <div className="p-6 space-y-5">
+                <div className="text-center space-y-1">
+                  <h2 className="text-xl font-bold">Login</h2>
+                  <p className="text-sm text-muted-foreground">
                     Access your account securely
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Login Method</Label>
-                      <RadioGroup value={loginMethod} onValueChange={(value: 'email' | 'phone') => setLoginMethod(value)}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="email" id="login-email" />
-                          <Label htmlFor="login-email" className="font-normal cursor-pointer">Email</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="phone" id="login-phone" />
-                          <Label htmlFor="login-phone" className="font-normal cursor-pointer">Phone Number</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
+                  </p>
+                </div>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base">Login Method</Label>
+                    <RadioGroup value={loginMethod} onValueChange={(value: 'email' | 'phone') => setLoginMethod(value)}>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
+                        <RadioGroupItem value="email" id="login-email" />
+                        <Label htmlFor="login-email" className="font-normal cursor-pointer flex-1">Email</Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
+                        <RadioGroupItem value="phone" id="login-phone" />
+                        <Label htmlFor="login-phone" className="font-normal cursor-pointer flex-1">Phone Number</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="loginIdentifier">
-                        {loginMethod === 'email' ? 'Email Address' : 'Phone Number'}
-                      </Label>
-                      <Input
-                        id="loginIdentifier"
-                        type={loginMethod === 'email' ? 'email' : 'tel'}
-                        placeholder={loginMethod === 'email' ? 'Enter your email' : 'Enter your phone number'}
-                        value={loginData.identifier}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, identifier: e.target.value }))}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="loginIdentifier" className="text-base">
+                      {loginMethod === 'email' ? 'Email Address' : 'Phone Number'}
+                    </Label>
+                    <Input
+                      id="loginIdentifier"
+                      type={loginMethod === 'email' ? 'email' : 'tel'}
+                      placeholder={loginMethod === 'email' ? 'Enter your email' : 'Enter your phone number'}
+                      value={loginData.identifier}
+                      onChange={(e) => setLoginData(prev => ({ ...prev, identifier: e.target.value }))}
+                      required
+                      className="h-12 text-base"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="loginPassword">Password</Label>
-                      <Input
-                        id="loginPassword"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="loginPassword" className="text-base">Password</Label>
+                    <Input
+                      id="loginPassword"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                      required
+                      className="h-12 text-base"
+                    />
+                  </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? "Logging in..." : "Login"}
-                    </Button>
+                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                    {isLoading ? "Logging in..." : "Login"}
+                  </Button>
 
-                    <div className="flex flex-col space-y-2 text-center text-sm">
-                      <button
-                        type="button"
-                        onClick={() => setShowForgotPassword(true)}
-                        className="text-primary hover:underline"
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-primary hover:underline text-sm"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </TabsContent>
 
-            <TabsContent value="signup">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>
+          <TabsContent value="signup" className="mt-6">
+            <div className="mobile-card">
+              <div className="p-6 space-y-5">
+                <div className="text-center space-y-1">
+                  <h2 className="text-xl font-bold">Create Account</h2>
+                  <p className="text-sm text-muted-foreground">
                     Join our healthcare network
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSignup} className="space-y-4">
+                  </p>
+                </div>
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName" className="text-base">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={signupData.fullName}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
+                      required
+                      className="h-12 text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-base">Login Method</Label>
+                    <RadioGroup value={signupMethod} onValueChange={(value: 'email' | 'phone') => setSignupMethod(value)}>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
+                        <RadioGroupItem value="email" id="signup-email" />
+                        <Label htmlFor="signup-email" className="font-normal cursor-pointer flex-1">Email</Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border">
+                        <RadioGroupItem value="phone" id="signup-phone" />
+                        <Label htmlFor="signup-phone" className="font-normal cursor-pointer flex-1">Phone Number</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {signupMethod === 'email' ? (
                     <div className="space-y-2">
-                      <Label htmlFor="fullName">Full Name</Label>
+                      <Label htmlFor="email" className="text-base">Email Address</Label>
                       <Input
-                        id="fullName"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={signupData.fullName}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={signupData.email}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
                         required
+                        className="h-12 text-base"
                       />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label>Login Method</Label>
-                      <RadioGroup value={signupMethod} onValueChange={(value: 'email' | 'phone') => setSignupMethod(value)}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="email" id="signup-email" />
-                          <Label htmlFor="signup-email" className="font-normal cursor-pointer">Email</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="phone" id="signup-phone" />
-                          <Label htmlFor="signup-phone" className="font-normal cursor-pointer">Phone Number</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    {signupMethod === 'email' ? (
+                  ) : (
+                    <>
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="Enter your email"
-                          value={signupData.email}
-                          onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                          required
+                        <Label htmlFor="country" className="text-base">Country</Label>
+                        <CountrySelector
+                          selectedCountry={countries.find(c => c.dialCode === signupData.countryCode) || countries[0]}
+                          onSelectCountry={(country) => setSignupData(prev => ({ ...prev, countryCode: country.dialCode }))}
                         />
                       </div>
-                    ) : (
-                      <>
-                        <div className="space-y-2">
-                          <Label htmlFor="country">Country</Label>
-                          <CountrySelector
-                            selectedCountry={countries.find(c => c.dialCode === signupData.countryCode) || countries[0]}
-                            onSelectCountry={(country) => setSignupData(prev => ({ ...prev, countryCode: country.dialCode }))}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number</Label>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            placeholder="Enter your phone number"
-                            value={signupData.phone}
-                            onChange={(e) => setSignupData(prev => ({ ...prev, phone: e.target.value }))}
-                            required
-                          />
-                        </div>
-                      </>
-                    )}
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-base">Phone Number</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="Enter your phone number"
+                          value={signupData.phone}
+                          onChange={(e) => setSignupData(prev => ({ ...prev, phone: e.target.value }))}
+                          required
+                          className="h-12 text-base"
+                        />
+                      </div>
+                    </>
+                  )}
 
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Minimum 8 characters"
-                        value={signupData.password}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Must contain uppercase, lowercase, and digit
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-base">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Minimum 8 characters"
+                      value={signupData.password}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
+                      required
+                      className="h-12 text-base"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Must contain uppercase, lowercase, and digit
+                    </p>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="Re-enter your password"
-                        value={signupData.confirmPassword}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Re-enter your password"
+                      value={signupData.confirmPassword}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      required
+                      className="h-12 text-base"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Select value={signupData.role} onValueChange={(value: 'user' | 'partner') => setSignupData(prev => ({ ...prev, role: value }))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">User</SelectItem>
-                          <SelectItem value="partner">Partner (Doctor/Hospital/Service Provider)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role" className="text-base">Role</Label>
+                    <Select value={signupData.role} onValueChange={(value: 'user' | 'partner') => setSignupData(prev => ({ ...prev, role: value }))}>
+                      <SelectTrigger className="h-12 text-base">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user" className="text-base">User</SelectItem>
+                        <SelectItem value="partner" className="text-base">Partner (Doctor/Hospital/Service Provider)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? "Creating Account..." : "Sign Up"}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                    {isLoading ? "Creating Account..." : "Sign Up"}
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 

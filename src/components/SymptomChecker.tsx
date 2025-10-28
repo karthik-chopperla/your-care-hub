@@ -250,7 +250,7 @@ export const SymptomChecker = ({ onClose }: SymptomCheckerProps) => {
               <Button variant="default" className="flex-1">
                 Book Doctor Appointment
               </Button>
-              <Button variant="wellness" className="flex-1">
+              <Button variant="secondary" className="flex-1">
                 Consult Elder Expert
               </Button>
               <Button variant="outline" onClick={() => {

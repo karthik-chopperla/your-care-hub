@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, Calendar, FileText, BarChart3, Hospital, Stethoscope, Ambulance, Pill, DollarSign, Utensils, Brain, Baby, Dumbbell, Shield, MessageSquare, PackageCheck, Navigation, ShoppingCart, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import MobileLayout from "@/components/MobileLayout";
+import MobileHeader from "@/components/MobileHeader";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -159,44 +161,47 @@ const PartnerDashboard = () => {
   const config = getDashboardConfig();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <div className="container py-8">
+    <MobileLayout>
+      <MobileHeader title="Partner Dashboard" showBack={false} />
+      
+      <div className="px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">{config.title}</h1>
-            <p className="text-muted-foreground">{config.subtitle}</p>
-            <p className="text-sm text-muted-foreground mt-1">Welcome, {partnerName}</p>
-          </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">{config.title}</h1>
+          <p className="text-sm text-muted-foreground">{config.subtitle}</p>
+          <p className="text-xs text-muted-foreground">Welcome, {partnerName}</p>
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Dashboard Cards */}
+        <div className="space-y-4">
           {config.cards.map((card, index) => {
             const Icon = card.icon;
             return (
-              <Card key={index}>
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <CardTitle>{card.title}</CardTitle>
+              <div key={index} className="mobile-card">
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10 shrink-0">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground">{card.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{card.description}</p>
+                    </div>
                   </div>
-                  <CardDescription>{card.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
                   <Button 
                     className="w-full" 
+                    size="lg"
                     onClick={() => card.path && navigate(card.path)}
                   >
                     {card.action}
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 

@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Building2, Hospital, Stethoscope, Ambulance, Pill, DollarSign, Utensils, Brain, Baby, Dumbbell, Shield } from "lucide-react";
+import MobileLayout from "@/components/MobileLayout";
+import MobileHeader from "@/components/MobileHeader";
 
 const RoleSelection = () => {
   const { toast } = useToast();
@@ -167,79 +169,82 @@ const RoleSelection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <div className="container flex min-h-screen items-center justify-center py-8">
-        <div className="mx-auto flex w-full max-w-6xl flex-col justify-center space-y-6">
-          {/* Header */}
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {showPartnerTypes ? 'Choose Your Partner Type' : 'Choose Your Role'}
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              {showPartnerTypes ? 'Select the service you will provide' : 'Select how you\'d like to use HealthMate'}
-            </p>
-          </div>
+    <MobileLayout showNavigation={false}>
+      <MobileHeader 
+        title={showPartnerTypes ? 'Choose Partner Type' : 'Choose Role'} 
+        showBack={showPartnerTypes} 
+        showNotifications={false}
+      />
+      
+      <div className="px-4 py-6 space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold">
+            {showPartnerTypes ? 'Choose Your Partner Type' : 'Choose Your Role'}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {showPartnerTypes ? 'Select the service you will provide' : 'Select how you\'d like to use Health Mate'}
+          </p>
+        </div>
 
-          {showPartnerTypes ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {partnerTypes.map((type) => {
-                const Icon = type.icon;
-                return (
-                  <Card 
-                    key={type.id}
-                    className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-2 hover:border-primary/50"
-                  >
-                    <CardHeader className="text-center pb-4">
-                      <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+        {showPartnerTypes ? (
+          <div className="space-y-4">
+            {partnerTypes.map((type) => {
+              const Icon = type.icon;
+              return (
+                <div key={type.id} className="mobile-card">
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-xl bg-primary/10 shrink-0">
                         <Icon className="h-6 w-6 text-primary" />
                       </div>
-                      <CardTitle className="text-lg">{type.name}</CardTitle>
-                      <CardDescription className="text-sm">{type.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button 
-                        onClick={() => handlePartnerTypeSelection(type.id)}
-                        className="w-full"
-                      >
-                        Select
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-              <Card className="md:col-span-2 lg:col-span-3">
-                <CardContent className="pt-6">
-                  <Button 
-                    onClick={() => setShowPartnerTypes(false)}
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    ← Back to Role Selection
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-            {/* User Role */}
-            <Card className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-2 hover:border-primary/50">
-              <CardHeader className="text-center pb-4">
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <Users className="h-8 w-8 text-primary" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground">{type.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{type.description}</p>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handlePartnerTypeSelection(type.id)}
+                      className="w-full"
+                      size="lg"
+                    >
+                      Select
+                    </Button>
+                  </div>
                 </div>
-                <CardTitle className="text-xl">User</CardTitle>
-                <CardDescription className="text-sm">
-                  Access healthcare services and manage your health
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              );
+            })}
+            <Button 
+              onClick={() => setShowPartnerTypes(false)}
+              variant="outline" 
+              size="lg"
+              className="w-full"
+            >
+              ← Back to Role Selection
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* User Role */}
+            <div className="mobile-card border-2 border-primary/20">
+              <div className="p-6 space-y-4">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="p-3 bg-primary/10 rounded-2xl">
+                    <Users className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">User</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Access healthcare services
+                    </p>
+                  </div>
+                </div>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>• Hospital Finder & Cost Comparison</p>
                   <p>• Emergency SOS</p>
                   <p>• Medicine Reminders</p>
                   <p>• Doctor Consultations</p>
                   <p>• Diet Plans & Mental Health</p>
-                  <p>• Pregnancy & Fitness Support</p>
                 </div>
                 <Button 
                   onClick={() => handleRoleSelection('user')}
@@ -248,27 +253,28 @@ const RoleSelection = () => {
                 >
                   Select User
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Partner Role */}
-            <Card className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-2 hover:border-secondary/50">
-              <CardHeader className="text-center pb-4">
-                <div className="mx-auto mb-4 p-3 bg-secondary/10 rounded-full w-fit">
-                  <Building2 className="h-8 w-8 text-secondary" />
+            <div className="mobile-card border-2 border-secondary/20">
+              <div className="p-6 space-y-4">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="p-3 bg-secondary/10 rounded-2xl">
+                    <Building2 className="h-8 w-8 text-secondary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Partner</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Provide healthcare services
+                    </p>
+                  </div>
                 </div>
-                <CardTitle className="text-xl">Partner</CardTitle>
-                <CardDescription className="text-sm">
-                  Provide healthcare services and manage your practice
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>• Hospital & Clinic Management</p>
                   <p>• Doctor Consultation Services</p>
-                  <p>• Emergency Response (Ambulance)</p>
+                  <p>• Emergency Response</p>
                   <p>• Pharmacy & Medicine Supply</p>
-                  <p>• Diet & Mental Health Services</p>
                   <p>• Specialized Care Programs</p>
                 </div>
                 <Button 
@@ -279,13 +285,12 @@ const RoleSelection = () => {
                 >
                   Select Partner
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
-          )}
-        </div>
+        )}
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 
