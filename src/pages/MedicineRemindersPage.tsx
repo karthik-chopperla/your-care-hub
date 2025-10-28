@@ -10,6 +10,8 @@ import { Pill, Plus, Clock, Calendar, Bell, Trash2, Edit, Heart, Check, X } from
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import MobileLayout from "@/components/MobileLayout";
+import MobileHeader from "@/components/MobileHeader";
 
 const MedicineRemindersPage = () => {
   const [reminders, setReminders] = useState([]);
@@ -283,20 +285,11 @@ const MedicineRemindersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      {/* Header */}
-      <header className="border-b border-border/40 bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={() => navigate('/user-dashboard')}>
-              ← Back
-            </Button>
-            <div className="p-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600">
-              <Pill className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold">Medicine Reminders</span>
-          </div>
-          
+    <MobileLayout>
+      <MobileHeader 
+        title="Medicine Reminders" 
+        showBack={true}
+        rightAction={
           <Dialog open={isAddDialogOpen || !!editingReminder} onOpenChange={(open) => {
             if (!open) {
               setIsAddDialogOpen(false);
@@ -305,12 +298,11 @@ const MedicineRemindersPage = () => {
             }
           }}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Reminder
+              <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
+                <Plus className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-full max-h-[85vh] overflow-y-auto mx-4">
               <DialogHeader>
                 <DialogTitle>{editingReminder ? 'Edit' : 'Add'} Medicine Reminder</DialogTitle>
                 <DialogDescription>
@@ -418,10 +410,10 @@ const MedicineRemindersPage = () => {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
-      </header>
+        }
+      />
 
-      <main className="container mx-auto p-4 space-y-6">
+      <div className="p-4 space-y-4 overflow-y-auto">
         {/* Active Reminders */}
         <Card>
           <CardHeader>
@@ -441,9 +433,9 @@ const MedicineRemindersPage = () => {
             ) : reminders.filter(r => r.is_active).length > 0 ? (
               <div className="space-y-3">
                 {reminders.filter(r => r.is_active).map((reminder) => (
-                  <div key={reminder.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
+                  <div key={reminder.id} className="mobile-card">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                           <div className="p-2 rounded-lg bg-red-500/10">
                             <Pill className="h-5 w-5 text-red-600" />
@@ -454,17 +446,17 @@ const MedicineRemindersPage = () => {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mt-3">
+                        <div className="flex flex-col gap-2 text-sm text-muted-foreground mt-3">
                           <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {reminder.reminder_times?.join(', ')}
+                            <Clock className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{reminder.reminder_times?.join(', ')}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {reminder.frequency.replace('_', ' ')}
+                            <Calendar className="h-4 w-4 shrink-0" />
+                            <span>{reminder.frequency.replace('_', ' ')}</span>
                           </div>
                           {reminder.next_reminder && (
-                            <Badge variant="outline">
+                            <Badge variant="outline" className="w-fit">
                               Next: {new Date(reminder.next_reminder).toLocaleString()}
                             </Badge>
                           )}
@@ -475,35 +467,38 @@ const MedicineRemindersPage = () => {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-2 ml-4">
+                       <div className="flex flex-col gap-1.5 ml-2 shrink-0">
                         <Button
                           size="sm"
                           onClick={() => handleMarkAsTaken(reminder.id)}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 h-8 px-2"
                         >
-                          <Check className="mr-2 h-4 w-4" />
+                          <Check className="h-3 w-3 mr-1" />
                           Taken
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => openEditDialog(reminder)}
+                          className="h-8 px-2"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3 w-3" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleToggleStatus(reminder.id, reminder.is_active)}
+                          className="h-8 px-2"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-3 w-3" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteReminder(reminder.id)}
+                          className="h-8 px-2"
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-3 w-3 text-destructive" />
                         </Button>
                       </div>
                     </div>
@@ -537,17 +532,18 @@ const MedicineRemindersPage = () => {
             <CardContent>
               <div className="space-y-3">
                 {reminders.filter(r => !r.is_active).map((reminder) => (
-                  <div key={reminder.id} className="p-4 border rounded-lg opacity-60">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-semibold">{reminder.medicine_name}</h3>
-                        <p className="text-sm text-muted-foreground">{reminder.dosage}</p>
+                  <div key={reminder.id} className="mobile-card opacity-60">
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold truncate">{reminder.medicine_name}</h3>
+                        <p className="text-sm text-muted-foreground truncate">{reminder.dosage}</p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 shrink-0">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleToggleStatus(reminder.id, reminder.is_active)}
+                          className="h-8 px-2 text-xs"
                         >
                           Reactivate
                         </Button>
@@ -555,8 +551,9 @@ const MedicineRemindersPage = () => {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteReminder(reminder.id)}
+                          className="h-8 px-2"
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-3 w-3 text-destructive" />
                         </Button>
                       </div>
                     </div>
@@ -566,8 +563,8 @@ const MedicineRemindersPage = () => {
             </CardContent>
           </Card>
         )}
-      </main>
-    </div>
+      </div>
+    </MobileLayout>
   );
 };
 
