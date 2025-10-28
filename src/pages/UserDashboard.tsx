@@ -23,35 +23,39 @@ import {
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import MobileNavigation from "@/components/MobileNavigation";
+import { useAuth } from "@/hooks/useAuth";
+import MobileLayout from "@/components/MobileLayout";
+import MobileHeader from "@/components/MobileHeader";
 
 const UserDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [sosActive, setSosActive] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
   const [medicineReminders, setMedicineReminders] = useState([]);
   const [nearbyMedicalShops, setNearbyMedicalShops] = useState([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading } = useAuth(true);
 
   useEffect(() => {
-    // Check if user has access to this dashboard
-    const userInfo = localStorage.getItem('healthmate_user');
-    if (!userInfo) {
-      navigate('/auth', { replace: true });
-      return;
+    if (user && !loading) {
+      loadDashboardData(user.id);
+      loadUserProfile(user.id);
     }
-    
-    const user = JSON.parse(userInfo);
-    if (user.role !== 'user') {
-      navigate('/', { replace: true });
-      return;
-    }
+  }, [user, loading]);
 
-    setUserInfo(user);
-    loadDashboardData(user.id);
-  }, [navigate]);
+  const loadUserProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (data) {
+      setUserProfile(data);
+    }
+  };
 
   const loadDashboardData = async (userId: string) => {
     try {
@@ -142,7 +146,7 @@ const UserDashboard = () => {
         const { data, error } = await supabase
           .from('sos_events')
           .insert({
-            user_id: userInfo?.id || 'demo-user',
+            user_id: user?.id || 'demo-user',
             location: location,
             status: 'initiated'
           });
@@ -261,305 +265,249 @@ const UserDashboard = () => {
     { name: "PLATINUM", color: "bg-purple-500", features: ["Everything in Gold", "SOS Emergency", "Home nursing", "Pregnancy care", "Priority support"] }
   ];
 
-  const currentPlan = userInfo?.subscription_plan || 'FREE';
+  const currentPlan = userProfile?.subscription_plan || 'FREE';
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 pb-20 md:pb-8">
-      {/* Header */}
-      <header className="border-b border-border/40 bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600">
-              <Heart className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold">HealthMate</span>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {notifications.length > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
-                  {notifications.length}
-                </Badge>
-              )}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
-              <User className="h-5 w-5" />
-            </Button>
+  if (loading) {
+    return (
+      <MobileLayout showNavigation={false}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <Heart className="h-12 w-12 text-primary animate-pulse mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
           </div>
         </div>
-      </header>
+      </MobileLayout>
+    );
+  }
 
-      <main className="container mx-auto p-4 space-y-6">
+  return (
+    <MobileLayout showNavigation={true} className="bg-gradient-app-bg">
+      {/* Mobile Header */}
+      <MobileHeader 
+        showLogo={true}
+        showNotifications={true}
+      />
+
+      <main className="px-4 py-6 space-y-5">
         {/* Welcome Section with SOS */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">
-                Welcome back, {userInfo?.full_name || 'User'}!
+        <div className="mobile-card bg-gradient-hero p-5 text-white">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <h1 className="text-xl font-bold mb-1">
+                Welcome, {userProfile?.full_name || user?.email?.split('@')[0] || 'User'}!
               </h1>
-              <p className="text-white/90 mb-4">
-                Your health journey continues here. How can we help you today?
+              <p className="text-white/90 text-sm">
+                Your health journey continues
               </p>
-              <Badge className={`${subscriptionPlans.find(p => p.name === currentPlan)?.color} text-white`}>
-                {currentPlan} PLAN
-              </Badge>
             </div>
+            {/* SOS Button */}
             <Button
               onClick={handleSOS}
               disabled={sosActive}
-              className={`${sosActive ? 'bg-red-700' : 'bg-red-600 hover:bg-red-700'} text-white font-bold px-6 py-3 text-lg`}
-              size="lg"
+              className={`${sosActive ? 'bg-urgent' : 'bg-urgent hover:bg-urgent/90'} text-white font-bold px-4 py-2 rounded-xl shadow-floating shrink-0`}
+              size="sm"
             >
-              <AlertTriangle className="mr-2 h-5 w-5" />
-              {sosActive ? 'SOS SENT' : 'SOS'}
+              <AlertTriangle className="h-5 w-5" />
             </Button>
           </div>
+          <Badge className={`${subscriptionPlans.find(p => p.name === currentPlan)?.color} text-white px-3 py-1`}>
+            {currentPlan} PLAN
+          </Badge>
         </div>
 
-        {/* Quick Actions Grid */}
+        {/* Quick Actions Grid - Mobile Optimized */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {quickActions.map((action, index) => (
-              <Card 
+          <h2 className="text-lg font-semibold mb-3 flex items-center justify-between">
+            Quick Actions
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/all-services')}
+              className="text-primary text-sm"
+            >
+              View All
+            </Button>
+          </h2>
+          <div className="grid grid-cols-3 gap-3">
+            {quickActions.slice(0, 9).map((action, index) => (
+              <div 
                 key={index} 
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                className="mobile-card p-3 text-center cursor-pointer active:scale-95 transition-transform"
                 onClick={() => navigate(action.path)}
               >
-                <CardContent className="p-4 text-center">
-                  <div className={`mb-3 p-3 rounded-lg mx-auto w-fit ${action.color}`}>
-                    {action.icon}
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">{action.title}</h3>
-                  <p className="text-xs text-muted-foreground">{action.description}</p>
-                </CardContent>
-              </Card>
+                <div className={`mb-2 p-2.5 rounded-xl mx-auto w-fit ${action.color}`}>
+                  {action.icon}
+                </div>
+                <h3 className="font-semibold text-xs leading-tight">{action.title}</h3>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Dashboard Widgets */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Dashboard Widgets - Mobile Optimized */}
+        <div className="space-y-4">
           {/* Upcoming Appointments */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
+          <div className="mobile-card">
+            <div className="p-4 border-b border-border/50">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
                 Upcoming Appointments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <div className="p-4">
               {appointments.length > 0 ? (
-                <div className="space-y-3">
-                  {appointments.slice(0, 3).map((appointment, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <p className="font-medium">{appointment.doctors?.name || 'Doctor'}</p>
-                        <p className="text-sm text-muted-foreground">{appointment.doctors?.specialty}</p>
+                <div className="space-y-2">
+                  {appointments.slice(0, 2).map((appointment, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted/30 rounded-xl">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{appointment.doctors?.name || 'Doctor'}</p>
+                        <p className="text-xs text-muted-foreground">{appointment.doctors?.specialty}</p>
                       </div>
-                      <Badge variant="outline">{new Date(appointment.scheduled_at).toLocaleDateString()}</Badge>
+                      <Badge variant="outline" className="text-xs">{new Date(appointment.scheduled_at).toLocaleDateString()}</Badge>
                     </div>
                   ))}
+                  <Button variant="ghost" className="w-full text-primary" size="sm" onClick={() => navigate('/bookings')}>
+                    View All
+                  </Button>
                 </div>
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No upcoming appointments</p>
-                  <Button variant="outline" className="mt-3" onClick={() => navigate('/doctors')}>
-                    Book Appointment
+                  <Calendar className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm mb-3">No upcoming appointments</p>
+                  <Button variant="outline" size="sm" onClick={() => navigate('/doctors')}>
+                    Book Now
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Medicine Reminders */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Pill className="h-5 w-5 text-red-600" />
+          <div className="mobile-card">
+            <div className="p-4 border-b border-border/50">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Pill className="h-4 w-4 text-urgent" />
                 Medicine Reminders
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <div className="p-4">
               {medicineReminders.length > 0 ? (
-                <div className="space-y-3">
-                  {medicineReminders.map((reminder, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <p className="font-medium">{reminder.medicine_name}</p>
-                        <p className="text-sm text-muted-foreground">{reminder.dosage}</p>
+                <div className="space-y-2">
+                  {medicineReminders.slice(0, 2).map((reminder, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted/30 rounded-xl">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{reminder.medicine_name}</p>
+                        <p className="text-xs text-muted-foreground">{reminder.dosage}</p>
                       </div>
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="text-xs">
                         {reminder.next_reminder ? new Date(reminder.next_reminder).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No time'}
                       </Badge>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full" onClick={() => navigate('/reminders')}>
-                    View All Reminders
+                  <Button variant="ghost" className="w-full text-primary" size="sm" onClick={() => navigate('/reminders')}>
+                    View All
                   </Button>
                 </div>
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
-                  <Pill className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No active reminders</p>
-                  <Button variant="outline" className="mt-3" onClick={() => navigate('/reminders')}>
+                  <Pill className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm mb-3">No active reminders</p>
+                  <Button variant="outline" size="sm" onClick={() => navigate('/reminders')}>
                     Add Reminder
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Notifications */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-amber-600" />
-                Recent Notifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {notifications.length > 0 ? (
-                <div className="space-y-3">
-                  {notifications.slice(0, 3).map((notification, index) => (
-                    <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                      <p className="font-medium text-sm">{notification.title}</p>
-                      <p className="text-xs text-muted-foreground">{notification.message}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No new notifications</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        {/* Medical Shops Widget */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Pill className="h-5 w-5 text-red-600" />
-              Nearby Medical Shops
-            </CardTitle>
-            <CardDescription>
-              Order medicines and refills from nearby pharmacies
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {nearbyMedicalShops.length > 0 ? (
-              <div className="space-y-3">
-                {nearbyMedicalShops.map((shop, index) => (
-                  <div key={index} className="p-4 bg-muted/50 rounded-lg hover:bg-muted/70 cursor-pointer transition-colors" onClick={() => navigate('/medical-shop')}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{shop.shop_name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                          <MapPin className="h-3 w-3" />
-                          {shop.city}, {shop.state}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant={shop.is_open ? "default" : "secondary"}>
-                            {shop.is_open ? "Open" : "Closed"}
-                          </Badge>
-                          {shop.delivery_available && (
-                            <Badge variant="outline">Delivery Available</Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium">{shop.ratings || 0}</span>
-                      </div>
+        {/* Nearby Medical Shops - Mobile Optimized */}
+        {nearbyMedicalShops.length > 0 && (
+          <div className="mobile-card">
+            <div className="p-4 border-b border-border/50">
+              <h3 className="font-semibold flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-secondary" />
+                Nearby Medical Shops
+              </h3>
+            </div>
+            <div className="p-4 space-y-2">
+              {nearbyMedicalShops.slice(0, 2).map((shop, index) => (
+                <div 
+                  key={index} 
+                  className="p-3 bg-muted/30 rounded-xl cursor-pointer active:scale-95 transition-transform" 
+                  onClick={() => navigate('/medical-shop')}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="font-medium text-sm flex-1">{shop.shop_name}</p>
+                    <div className="flex items-center gap-0.5">
+                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                      <span className="text-xs font-medium">{shop.ratings || 0}</span>
                     </div>
                   </div>
-                ))}
-                <Button variant="outline" className="w-full" onClick={() => navigate('/medical-shop')}>
-                  View All Medical Shops
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center py-6 text-muted-foreground">
-                <Pill className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No medical shops found</p>
-                <Button variant="outline" className="mt-3" onClick={() => navigate('/medical-shop')}>
-                  Search Medical Shops
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* All Services Quick Access */}
-        <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold mb-2">Explore All Services</h3>
-                <p className="text-white/90">
-                  Access all partner services with real-time updates
-                </p>
-              </div>
-              <Button 
-                variant="secondary"
-                size="lg"
-                onClick={() => navigate('/all-services')}
-              >
-                View All Services
-              </Button>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
+                    <MapPin className="h-3 w-3" />
+                    {shop.city}, {shop.state}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={shop.is_open ? "default" : "secondary"} className="text-xs px-2 py-0">
+                      {shop.is_open ? "Open" : "Closed"}
+                    </Badge>
+                    {shop.delivery_available && (
+                      <Badge variant="outline" className="text-xs px-2 py-0">Delivery</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
-        {/* Subscription Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-purple-600" />
-              Subscription Plans
-            </CardTitle>
-            <CardDescription>
-              Upgrade your plan to unlock more features
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Subscription Plans - Mobile Optimized */}
+        <div className="mobile-card">
+          <div className="p-4 border-b border-border/50">
+            <h3 className="font-semibold flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-primary" />
+              Your Subscription
+            </h3>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               {subscriptionPlans.map((plan, index) => (
-                <div key={index} className={`p-4 rounded-lg border-2 ${currentPlan === plan.name ? 'border-primary bg-primary/5' : 'border-muted'}`}>
-                  <div className={`w-fit px-3 py-1 rounded-full text-white text-sm font-medium mb-3 ${plan.color}`}>
+                <div 
+                  key={index} 
+                  className={`p-3 rounded-xl border-2 ${currentPlan === plan.name ? 'border-primary bg-primary/5' : 'border-border'}`}
+                >
+                  <div className={`w-fit px-2 py-0.5 rounded-md text-white text-xs font-medium mb-2 ${plan.color}`}>
                     {plan.name}
                   </div>
-                  <ul className="space-y-2 text-sm">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 bg-green-500 rounded-full"></div>
-                        {feature}
+                  <ul className="space-y-1 text-xs mb-2">
+                    {plan.features.slice(0, 2).map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-1">
+                        <div className="h-1 w-1 bg-secondary rounded-full mt-1.5 shrink-0"></div>
+                        <span className="leading-tight">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   {currentPlan !== plan.name && (
                     <Button 
-                      className="w-full mt-4" 
+                      className="w-full h-7 text-xs" 
                       variant={plan.name === 'PLATINUM' ? 'default' : 'outline'}
-                      onClick={() => navigate('/subscriptions')}
+                      size="sm"
+                      onClick={() => toast({ title: "Coming soon!", description: "Subscription upgrade will be available soon." })}
                     >
                       Upgrade
                     </Button>
                   )}
+                  {currentPlan === plan.name && (
+                    <div className="text-xs text-primary font-medium text-center">Active</div>
+                  )}
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </main>
-      <MobileNavigation />
-    </div>
+    </MobileLayout>
   );
 };
 
