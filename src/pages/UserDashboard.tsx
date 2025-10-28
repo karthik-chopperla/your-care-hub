@@ -18,7 +18,13 @@ import {
   Brain,
   Home,
   Utensils,
-  Star
+  Star,
+  Activity,
+  FileText,
+  Leaf,
+  MessageCircle,
+  ShoppingBag,
+  Dumbbell
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -181,80 +187,112 @@ const UserDashboard = () => {
       title: "AI Symptom Checker",
       description: "Get instant health assessment",
       path: "/symptom-checker",
-      color: "bg-blue-500/10 text-blue-600",
-      buttonVariant: "default"
+      color: "bg-blue-500/10 text-blue-600"
     },
     {
-      icon: <Calendar className="h-6 w-6" />,
-      title: "Book Doctor",
-      description: "Find and book appointments",
-      path: "/doctors",
-      color: "bg-green-500/10 text-green-600",
-      buttonVariant: "default"
+      icon: <Leaf className="h-6 w-6" />,
+      title: "Home Remedies",
+      description: "Natural healing solutions",
+      path: "/home-remedies",
+      color: "bg-green-500/10 text-green-600"
     },
     {
       icon: <MapPin className="h-6 w-6" />,
-      title: "Find Hospitals",
+      title: "Hospital Finder",
       description: "Locate nearby healthcare",
       path: "/hospitals",
-      color: "bg-purple-500/10 text-purple-600",
-      buttonVariant: "default"
+      color: "bg-purple-500/10 text-purple-600"
     },
     {
-      icon: <Users className="h-6 w-6" />,
-      title: "Elder Experts",
-      description: "Traditional medicine guidance",
-      path: "/elder-experts",
-      color: "bg-amber-500/10 text-amber-600",
-      buttonVariant: "default"
+      icon: <Calendar className="h-6 w-6" />,
+      title: "Doctor Booking",
+      description: "Find and book appointments",
+      path: "/doctors",
+      color: "bg-cyan-500/10 text-cyan-600"
     },
     {
       icon: <Pill className="h-6 w-6" />,
       title: "Medicine Reminders",
       description: "Never miss your medication",
       path: "/reminders",
-      color: "bg-red-500/10 text-red-600",
-      buttonVariant: "default"
+      color: "bg-red-500/10 text-red-600"
     },
     {
-      icon: <Pill className="h-6 w-6" />,
+      icon: <ShoppingBag className="h-6 w-6" />,
       title: "Medical Shop",
       description: "Order medicines and refills",
       path: "/medical-shop",
-      color: "bg-red-500/10 text-red-600",
-      buttonVariant: "default"
+      color: "bg-rose-500/10 text-rose-600"
     },
     {
       icon: <Brain className="h-6 w-6" />,
       title: "Mental Health",
       description: "Counseling and support",
       path: "/mental-health",
-      color: "bg-indigo-500/10 text-indigo-600",
-      buttonVariant: "default"
-    },
-    {
-      icon: <Baby className="h-6 w-6" />,
-      title: "Pregnancy Care",
-      description: "Mother and baby wellness",
-      path: "/pregnancy-care",
-      color: "bg-pink-500/10 text-pink-600",
-      buttonVariant: "default"
+      color: "bg-indigo-500/10 text-indigo-600"
     },
     {
       icon: <Home className="h-6 w-6" />,
       title: "Home Nursing",
       description: "Professional care at home",
       path: "/home-nursing",
-      color: "bg-teal-500/10 text-teal-600",
-      buttonVariant: "default"
+      color: "bg-teal-500/10 text-teal-600"
+    },
+    {
+      icon: <Baby className="h-6 w-6" />,
+      title: "Pregnancy Care",
+      description: "Mother and baby wellness",
+      path: "/pregnancy-care",
+      color: "bg-pink-500/10 text-pink-600"
     },
     {
       icon: <Utensils className="h-6 w-6" />,
       title: "Diet Plans",
       description: "Nutrition and meal planning",
       path: "/diet-plans",
-      color: "bg-orange-500/10 text-orange-600",
-      buttonVariant: "default"
+      color: "bg-orange-500/10 text-orange-600"
+    },
+    {
+      icon: <Dumbbell className="h-6 w-6" />,
+      title: "Fitness Recovery",
+      description: "Exercise and recovery plans",
+      path: "/fitness-recovery",
+      color: "bg-lime-500/10 text-lime-600"
+    },
+    {
+      icon: <CreditCard className="h-6 w-6" />,
+      title: "Health Insurance",
+      description: "Policies and claims",
+      path: "/insurance",
+      color: "bg-violet-500/10 text-violet-600"
+    },
+    {
+      icon: <FileText className="h-6 w-6" />,
+      title: "My Records",
+      description: "Store health documents",
+      path: "/my-records",
+      color: "bg-slate-500/10 text-slate-600"
+    },
+    {
+      icon: <MessageCircle className="h-6 w-6" />,
+      title: "AI Chatbot",
+      description: "24×7 health assistant",
+      path: "/ai-chatbot",
+      color: "bg-emerald-500/10 text-emerald-600"
+    },
+    {
+      icon: <Utensils className="h-6 w-6" />,
+      title: "Find Food",
+      description: "Healthy food services",
+      path: "/find-food",
+      color: "bg-amber-500/10 text-amber-600"
+    },
+    {
+      icon: <Star className="h-6 w-6" />,
+      title: "Subscription Plans",
+      description: "Upgrade your plan",
+      path: "/subscription",
+      color: "bg-yellow-500/10 text-yellow-600"
     }
   ];
 
@@ -315,30 +353,20 @@ const UserDashboard = () => {
           </Badge>
         </div>
 
-        {/* Quick Actions Grid - Mobile Optimized */}
+        {/* Quick Actions Grid - All 16 Tiles */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 flex items-center justify-between">
-            Quick Actions
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/all-services')}
-              className="text-primary text-sm"
-            >
-              View All
-            </Button>
-          </h2>
-          <div className="grid grid-cols-3 gap-3">
-            {quickActions.slice(0, 9).map((action, index) => (
+          <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+          <div className="grid grid-cols-4 gap-2.5">
+            {quickActions.map((action, index) => (
               <div 
                 key={index} 
-                className="mobile-card p-3 text-center cursor-pointer active:scale-95 transition-transform"
+                className="mobile-card p-2.5 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform min-h-[90px]"
                 onClick={() => navigate(action.path)}
               >
-                <div className={`mb-2 p-2.5 rounded-xl mx-auto w-fit ${action.color}`}>
+                <div className={`mb-1.5 p-2 rounded-xl ${action.color}`}>
                   {action.icon}
                 </div>
-                <h3 className="font-semibold text-xs leading-tight">{action.title}</h3>
+                <h3 className="font-semibold text-[10px] leading-tight text-center">{action.title}</h3>
               </div>
             ))}
           </div>
