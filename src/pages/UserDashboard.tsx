@@ -22,7 +22,6 @@ import {
   Activity,
   FileText,
   Leaf,
-  MessageCircle,
   ShoppingBag,
   Dumbbell
 } from "lucide-react";
@@ -272,13 +271,6 @@ const UserDashboard = () => {
       description: "Store health documents",
       path: "/my-records",
       color: "bg-slate-500/10 text-slate-600"
-    },
-    {
-      icon: <MessageCircle className="h-6 w-6" />,
-      title: "AI Chatbot",
-      description: "24×7 health assistant",
-      path: "/ai-chatbot",
-      color: "bg-emerald-500/10 text-emerald-600"
     },
     {
       icon: <Utensils className="h-6 w-6" />,

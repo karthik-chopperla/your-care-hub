@@ -25,7 +25,6 @@ import HomeRemediesPage from "./pages/HomeRemediesPage";
 import DietPlansPage from "./pages/DietPlansPage";
 import FitnessRecoveryPage from "./pages/FitnessRecoveryPage";
 import MyRecordsPage from "./pages/MyRecordsPage";
-import AIChatbotPage from "./pages/AIChatbotPage";
 import FindFoodPage from "./pages/FindFoodPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import HospitalDataPage from "./pages/partner/HospitalDataPage";
@@ -71,7 +70,6 @@ const App = () => {
             <Route path="/diet-plans" element={<DietPlansPage />} />
             <Route path="/fitness-recovery" element={<FitnessRecoveryPage />} />
             <Route path="/my-records" element={<MyRecordsPage />} />
-            <Route path="/ai-chatbot" element={<AIChatbotPage />} />
             <Route path="/find-food" element={<FindFoodPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/partner-services" element={<PartnerServicesList />} />
