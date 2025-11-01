@@ -749,18 +749,18 @@ export type Database = {
       }
       insurance_partners: {
         Row: {
-          address: string | null
           agent_name: string
           city: string | null
           company_name: string
+          coverage_details: Json | null
           created_at: string | null
           email: string | null
           id: string
           insurance_types: string[] | null
-          is_active: boolean | null
+          is_available: boolean | null
           license_number: string | null
           location: Json
-          partner_id: string | null
+          partner_id: string
           phone_number: string | null
           ratings: number | null
           state: string | null
@@ -768,18 +768,18 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          address?: string | null
           agent_name: string
           city?: string | null
           company_name: string
+          coverage_details?: Json | null
           created_at?: string | null
           email?: string | null
           id?: string
           insurance_types?: string[] | null
-          is_active?: boolean | null
+          is_available?: boolean | null
           license_number?: string | null
-          location: Json
-          partner_id?: string | null
+          location?: Json
+          partner_id: string
           phone_number?: string | null
           ratings?: number | null
           state?: string | null
@@ -787,18 +787,18 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          address?: string | null
           agent_name?: string
           city?: string | null
           company_name?: string
+          coverage_details?: Json | null
           created_at?: string | null
           email?: string | null
           id?: string
           insurance_types?: string[] | null
-          is_active?: boolean | null
+          is_available?: boolean | null
           license_number?: string | null
           location?: Json
-          partner_id?: string | null
+          partner_id?: string
           phone_number?: string | null
           ratings?: number | null
           state?: string | null
@@ -810,7 +810,7 @@ export type Database = {
             foreignKeyName: "insurance_partners_partner_id_fkey"
             columns: ["partner_id"]
             isOneToOne: false
-            referencedRelation: "user_info"
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]
@@ -852,15 +852,7 @@ export type Database = {
           premium_monthly?: number | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "insurance_plans_partner_id_fkey"
-            columns: ["partner_id"]
-            isOneToOne: false
-            referencedRelation: "insurance_partners"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       medical_shops: {
         Row: {
