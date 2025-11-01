@@ -6,34 +6,55 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import MobileLayout from "@/components/MobileLayout";
 import MobileHeader from "@/components/MobileHeader";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading } = useAuth(true);
   const [serviceType, setServiceType] = useState<string>('');
   const [partnerName, setPartnerName] = useState<string>('');
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('healthmate_user');
-    if (!userInfo) {
-      navigate('/auth', { replace: true });
-      return;
-    }
+    const checkPartnerAccess = async () => {
+      if (loading) return;
+      
+      if (!user) {
+        navigate('/auth', { replace: true });
+        return;
+      }
 
-    const parsed = JSON.parse(userInfo);
-    if (parsed.role !== 'partner') {
-      navigate('/', { replace: true });
-      return;
-    }
+      // Check if user is a partner
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
 
-    if (!parsed.service_type) {
-      navigate('/role-selection', { replace: true });
-      return;
-    }
+      if (roles?.role !== 'partner') {
+        navigate('/user-dashboard', { replace: true });
+        return;
+      }
 
-    setServiceType(parsed.service_type || '');
-    setPartnerName(parsed.full_name || 'Partner');
-  }, [navigate]);
+      // Get partner profile with service type
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('service_type, full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.service_type) {
+        navigate('/role-selection', { replace: true });
+        return;
+      }
+
+      setServiceType(profile.service_type || '');
+      setPartnerName(profile.full_name || 'Partner');
+    };
+
+    checkPartnerAccess();
+  }, [user, loading, navigate]);
 
   const getDashboardConfig = () => {
     switch (serviceType) {
@@ -159,6 +180,10 @@ const PartnerDashboard = () => {
   };
 
   const config = getDashboardConfig();
+
+  if (loading || !user) {
+    return null;
+  }
 
   return (
     <MobileLayout>
