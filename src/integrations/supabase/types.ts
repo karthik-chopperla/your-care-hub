@@ -1521,6 +1521,30 @@ export type Database = {
           },
         ]
       }
+      symptom_history: {
+        Row: {
+          assessment: Json
+          created_at: string
+          id: string
+          symptoms: string
+          user_id: string
+        }
+        Insert: {
+          assessment: Json
+          created_at?: string
+          id?: string
+          symptoms: string
+          user_id: string
+        }
+        Update: {
+          assessment?: Json
+          created_at?: string
+          id?: string
+          symptoms?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_info: {
         Row: {
           age: number | null
