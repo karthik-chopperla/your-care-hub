@@ -153,12 +153,27 @@ const RoleSelection = () => {
         return;
       }
 
+      // Map service type to dashboard route
+      const dashboardMap: Record<string, string> = {
+        'hospital': '/partner/hospital-dashboard',
+        'elder_expert': '/partner/elder-advice-dashboard',
+        'doctor': '/partner/gynecologist-dashboard',
+        'ambulance': '/partner/ambulance-dashboard',
+        'pharmacist': '/partner/medical-shop-dashboard',
+        'price_comparison': '/partner/medical-shop-dashboard',
+        'dietitian': '/partner/restaurant-dashboard',
+        'mental_health': '/partner/mental-health-dashboard',
+        'pregnancy_care': '/partner/gynecologist-dashboard',
+        'fitness': '/partner/fitness-dashboard',
+        'insurance': '/partner/insurance-dashboard',
+      };
+
       toast({
         title: "Success",
         description: "Partner account created successfully!"
       });
 
-      navigate('/partner-services');
+      navigate(dashboardMap[serviceType] || '/partner-services');
     } catch (error: any) {
       toast({
         title: "Error",

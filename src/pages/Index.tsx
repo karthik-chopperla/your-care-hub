@@ -36,7 +36,6 @@ const Index = () => {
         if (roles?.role === 'user') {
           navigate('/user-dashboard', { replace: true });
         } else if (roles?.role === 'partner') {
-          // Check if partner has selected service type
           const { data: profile } = await supabase
             .from('profiles')
             .select('service_type')
@@ -44,7 +43,22 @@ const Index = () => {
             .single();
 
           if (profile?.service_type) {
-            navigate('/partner-dashboard', { replace: true });
+            // Map service type to dashboard route
+            const dashboardMap: Record<string, string> = {
+              'hospital': '/partner/hospital-dashboard',
+              'elder_expert': '/partner/elder-advice-dashboard',
+              'doctor': '/partner/gynecologist-dashboard',
+              'ambulance': '/partner/ambulance-dashboard',
+              'pharmacist': '/partner/medical-shop-dashboard',
+              'price_comparison': '/partner/medical-shop-dashboard',
+              'dietitian': '/partner/restaurant-dashboard',
+              'mental_health': '/partner/mental-health-dashboard',
+              'pregnancy_care': '/partner/gynecologist-dashboard',
+              'fitness': '/partner/fitness-dashboard',
+              'insurance': '/partner/insurance-dashboard',
+            };
+            
+            navigate(dashboardMap[profile.service_type] || '/partner-services', { replace: true });
           } else {
             navigate('/role-selection', { replace: true });
           }
