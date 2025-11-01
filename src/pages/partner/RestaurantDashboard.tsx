@@ -9,11 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UtensilsCrossed, DollarSign, ShoppingBag, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RestaurantDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const { user, loading } = useAuth(true);
+  const [profile, setProfile] = useState<any>(null);
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -39,21 +41,42 @@ export default function RestaurantDashboard() {
   });
 
   useEffect(() => {
-    const healthmateUser = localStorage.getItem("healthmate_user");
-    if (!healthmateUser) {
-      navigate("/auth");
-      return;
-    }
+    const checkUserRole = async () => {
+      if (loading) return;
+      
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
 
-    const userData = JSON.parse(healthmateUser);
-    if (userData.role !== "partner") {
-      navigate("/user-dashboard");
-      return;
-    }
+      // Check if user is a partner
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
 
-    setUser(userData);
-    loadDashboardData(userData.id);
-  }, [navigate]);
+      if (roleData?.role !== 'partner') {
+        navigate("/user-dashboard");
+        return;
+      }
+
+      // Load profile data
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+
+      loadDashboardData(user.id);
+    };
+
+    checkUserRole();
+  }, [user, loading, navigate]);
 
   const loadDashboardData = async (partnerId: string) => {
     try {
@@ -81,6 +104,8 @@ export default function RestaurantDashboard() {
 
   const handleRestaurantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     try {
       const { error } = await supabase.from("restaurant_partners").insert({
         ...restaurantFormData,
@@ -157,7 +182,7 @@ export default function RestaurantDashboard() {
     }
   };
 
-  if (!user || isLoading) return null;
+  if (loading || !user || isLoading) return null;
 
   const stats = {
     totalRestaurants: restaurants.length,
@@ -358,8 +383,8 @@ export default function RestaurantDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p><strong>Name:</strong> {user.full_name}</p>
-              <p><strong>Phone:</strong> {user.phone_number}</p>
+              <p><strong>Name:</strong> {profile?.full_name || 'N/A'}</p>
+              <p><strong>Phone:</strong> {profile?.phone_number || 'N/A'}</p>
               <p><strong>Email:</strong> {user.email}</p>
               <p><strong>Role:</strong> Restaurant Partner</p>
             </div>
