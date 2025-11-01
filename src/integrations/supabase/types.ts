@@ -1738,6 +1738,7 @@ export type Database = {
       }
     }
     Functions: {
+      get_user_partner_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1745,6 +1746,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_partner_owner: { Args: { _partner_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "user" | "partner" | "admin"

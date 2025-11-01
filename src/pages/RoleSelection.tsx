@@ -112,8 +112,8 @@ const RoleSelection = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast({
-          title: "Error",
-          description: "Session expired. Please login again.",
+          title: "Session Expired",
+          description: "Please login again to continue.",
           variant: "destructive"
         });
         navigate('/auth');
@@ -121,13 +121,23 @@ const RoleSelection = () => {
       }
 
       // Get user profile info
-      const { data: profile } = await supabase
+      const { data: profile, error: profileFetchError } = await supabase
         .from('profiles')
         .select('full_name, email, phone_number')
         .eq('id', session.user.id)
         .single();
 
-      // Step 1: Insert partner role
+      if (profileFetchError) {
+        console.error('Profile fetch error:', profileFetchError);
+        toast({
+          title: "Unable to complete registration",
+          description: "Please complete your partner profile and try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Step 1: Insert partner role (idempotent - ignore duplicates)
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({ 
@@ -136,165 +146,206 @@ const RoleSelection = () => {
         });
 
       if (roleError && !roleError.message.includes('duplicate')) {
+        console.error('Role insertion error:', roleError);
         toast({
-          title: "Unable to complete registration",
-          description: "Please verify your service module.",
+          title: "Registration Failed",
+          description: "Unable to register service. Please complete your partner profile and try again.",
           variant: "destructive"
         });
         return;
       }
 
-      // Step 2: Create master partner record
-      const { data: partnerData, error: partnerError } = await supabase
+      // Step 2: Create master partner record (with existence check)
+      let partnerId: string;
+      
+      // Check if partner record already exists
+      const { data: existingPartner } = await supabase
         .from('partners')
-        .insert({
-          user_id: session.user.id,
-          name: profile?.full_name || 'Partner',
-          service_type: serviceType,
-          email: profile?.email || session.user.email,
-          phone_number: profile?.phone_number
-        })
         .select('id')
+        .eq('user_id', session.user.id)
         .single();
 
-      if (partnerError) {
-        toast({
-          title: "Unable to complete registration",
-          description: "Please verify your service module.",
-          variant: "destructive"
-        });
-        return;
-      }
+      if (existingPartner) {
+        partnerId = existingPartner.id;
+      } else {
+        // Create new partner record
+        const { data: partnerData, error: partnerError } = await supabase
+          .from('partners')
+          .insert({
+            user_id: session.user.id,
+            name: profile?.full_name || 'Partner',
+            service_type: serviceType,
+            email: profile?.email || session.user.email,
+            phone_number: profile?.phone_number
+          })
+          .select('id')
+          .single();
 
-      if (!partnerData) {
-        toast({
-          title: "Error",
-          description: "Failed to create partner record.",
-          variant: "destructive"
-        });
-        return;
-      }
+        if (partnerError) {
+          console.error('Partner creation error:', partnerError);
+          toast({
+            title: "Registration Failed",
+            description: "Service creation failed — partner identity not yet set. Please retry or contact support.",
+            variant: "destructive"
+          });
+          return;
+        }
 
-      const partnerId = partnerData.id;
+        if (!partnerData) {
+          toast({
+            title: "Registration Failed",
+            description: "Unable to create partner record. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        partnerId = partnerData.id;
+      }
 
       // Step 3: Create service-specific record based on type
       let serviceError = null;
+      let serviceCreated = false;
       
-      switch (serviceType) {
-        case 'doctor':
-        case 'pregnancy_care':
-          const { error: gynError } = await supabase
-            .from('gynecologists')
-            .insert({
-              partner_id: partnerId,
-              name: profile?.full_name || 'Doctor',
-              email: profile?.email || session.user.email,
-              phone_number: profile?.phone_number,
-              location: {},
-              specialization: []
-            });
-          serviceError = gynError;
-          break;
+      try {
+        switch (serviceType) {
+          case 'doctor':
+          case 'pregnancy_care':
+            const { error: gynError } = await supabase
+              .from('gynecologists')
+              .insert({
+                partner_id: partnerId,
+                name: profile?.full_name || 'Doctor',
+                email: profile?.email || session.user.email,
+                phone_number: profile?.phone_number,
+                location: {},
+                specialization: []
+              });
+            serviceError = gynError;
+            serviceCreated = !gynError;
+            break;
 
-        case 'mental_health':
-          const { error: mentalError } = await supabase
-            .from('mental_health_partners')
-            .insert({
-              partner_id: partnerId,
-              name: profile?.full_name || 'Mental Health Partner',
-              email: profile?.email || session.user.email,
-              phone_number: profile?.phone_number,
-              location: {},
-              specialization: []
-            });
-          serviceError = mentalError;
-          break;
+          case 'mental_health':
+            const { error: mentalError } = await supabase
+              .from('mental_health_partners')
+              .insert({
+                partner_id: partnerId,
+                name: profile?.full_name || 'Mental Health Partner',
+                email: profile?.email || session.user.email,
+                phone_number: profile?.phone_number,
+                location: {},
+                specialization: []
+              });
+            serviceError = mentalError;
+            serviceCreated = !mentalError;
+            break;
 
-        case 'fitness':
-          const { error: fitnessError } = await supabase
-            .from('fitness_partners')
-            .insert({
-              partner_id: partnerId,
-              name: profile?.full_name || 'Fitness Partner',
-              email: profile?.email || session.user.email,
-              phone_number: profile?.phone_number,
-              location: {}
-            });
-          serviceError = fitnessError;
-          break;
+          case 'fitness':
+            const { error: fitnessError } = await supabase
+              .from('fitness_partners')
+              .insert({
+                partner_id: partnerId,
+                name: profile?.full_name || 'Fitness Partner',
+                email: profile?.email || session.user.email,
+                phone_number: profile?.phone_number,
+                location: {}
+              });
+            serviceError = fitnessError;
+            serviceCreated = !fitnessError;
+            break;
 
-        case 'home_nursing':
-          const { error: nursingError } = await supabase
-            .from('home_nursing_partners')
-            .insert({
-              partner_id: partnerId,
-              agency_name: profile?.full_name || 'Nursing Agency',
-              email: profile?.email || session.user.email,
-              phone_number: profile?.phone_number,
-              location: {},
-              services_offered: []
-            });
-          serviceError = nursingError;
-          break;
+          case 'home_nursing':
+            const { error: nursingError } = await supabase
+              .from('home_nursing_partners')
+              .insert({
+                partner_id: partnerId,
+                agency_name: profile?.full_name || 'Nursing Agency',
+                email: profile?.email || session.user.email,
+                phone_number: profile?.phone_number,
+                location: {},
+                services_offered: []
+              });
+            serviceError = nursingError;
+            serviceCreated = !nursingError;
+            break;
 
-        case 'dietitian':
-        case 'restaurant':
-          const { error: restaurantError } = await supabase
-            .from('restaurant_partners')
-            .insert({
-              partner_id: partnerId,
-              name: profile?.full_name || 'Restaurant Partner',
-              email: profile?.email || session.user.email,
-              phone_number: profile?.phone_number,
-              location: {},
-              cuisine_types: []
-            });
-          serviceError = restaurantError;
-          break;
+          case 'dietitian':
+          case 'restaurant':
+            const { error: restaurantError } = await supabase
+              .from('restaurant_partners')
+              .insert({
+                partner_id: partnerId,
+                name: profile?.full_name || 'Restaurant Partner',
+                email: profile?.email || session.user.email,
+                phone_number: profile?.phone_number,
+                location: {},
+                cuisine_types: []
+              });
+            serviceError = restaurantError;
+            serviceCreated = !restaurantError;
+            break;
 
-        case 'insurance':
-          const { error: insuranceError } = await supabase
-            .from('insurance_partners')
-            .insert({
-              partner_id: partnerId,
-              company_name: profile?.full_name || 'Insurance Company',
-              agent_name: profile?.full_name || 'Agent',
-              email: profile?.email || session.user.email,
-              phone_number: profile?.phone_number,
-              location: {},
-              insurance_types: []
-            });
-          serviceError = insuranceError;
-          break;
+          case 'insurance':
+            const { error: insuranceError } = await supabase
+              .from('insurance_partners')
+              .insert({
+                partner_id: partnerId,
+                company_name: profile?.full_name || 'Insurance Company',
+                agent_name: profile?.full_name || 'Agent',
+                email: profile?.email || session.user.email,
+                phone_number: profile?.phone_number,
+                location: {},
+                insurance_types: []
+              });
+            serviceError = insuranceError;
+            serviceCreated = !insuranceError;
+            break;
 
-        case 'elder_expert':
-          // Elder experts table doesn't allow inserts via RLS, skip for now
-          break;
+          case 'elder_expert':
+            // Elder experts require admin verification, mark as created
+            serviceCreated = true;
+            break;
 
-        case 'hospital':
-          // Hospitals are managed separately, skip service-specific insert
-          break;
+          case 'hospital':
+            // Hospitals are managed separately, mark as created
+            serviceCreated = true;
+            break;
+
+          default:
+            serviceError = { message: 'Invalid service type' };
+        }
+      } catch (error: any) {
+        console.error('Service creation error:', error);
+        serviceError = error;
       }
 
       if (serviceError) {
-        // Rollback partner creation if service-specific insert fails
-        await supabase.from('partners').delete().eq('id', partnerId);
+        console.error('Service-specific insertion error:', serviceError);
+        
+        // Rollback partner creation if it was newly created
+        if (!existingPartner) {
+          await supabase.from('partners').delete().eq('id', partnerId);
+        }
         
         toast({
-          title: "Unable to complete registration",
-          description: "Please verify your service module.",
+          title: "Registration Failed",
+          description: "Unable to register service. Please complete your partner profile and try again.",
           variant: "destructive"
         });
         return;
       }
 
-      // Update profile with service type
-      await supabase
+      // Step 4: Update profile with service type
+      const { error: profileUpdateError } = await supabase
         .from('profiles')
         .update({ service_type: serviceType })
         .eq('id', session.user.id);
 
-      // Map service type to dashboard route
+      if (profileUpdateError) {
+        console.error('Profile update error:', profileUpdateError);
+      }
+
+      // Step 5: Navigate to appropriate dashboard
       const dashboardMap: Record<string, string> = {
         'hospital': '/partner/hospital-dashboard',
         'doctor': '/partner/gynecologist-dashboard',
@@ -308,26 +359,27 @@ const RoleSelection = () => {
         'insurance': '/partner/insurance-dashboard',
       };
 
-      toast({
-        title: "Success",
-        description: "Partner account created successfully!"
-      });
-
       const dashboardRoute = dashboardMap[serviceType];
       if (!dashboardRoute) {
         toast({
-          title: "Error",
-          description: "No valid dashboard assigned. Please select your service type.",
+          title: "Navigation Error",
+          description: "No valid dashboard assigned. Please contact support.",
           variant: "destructive"
         });
         return;
       }
 
+      toast({
+        title: "Success",
+        description: "Partner account created successfully!"
+      });
+
       navigate(dashboardRoute);
     } catch (error: any) {
+      console.error('Unexpected registration error:', error);
       toast({
-        title: "Error",
-        description: error.message || "An unexpected error occurred",
+        title: "Registration Failed",
+        description: "An unexpected error occurred. Please try again or contact support.",
         variant: "destructive"
       });
     }
