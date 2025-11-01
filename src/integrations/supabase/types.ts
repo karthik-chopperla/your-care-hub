@@ -1730,6 +1730,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_insert_service_record: {
+        Args: { _partner_id: string }
+        Returns: boolean
+      }
       get_user_partner_id: { Args: never; Returns: string }
       has_role: {
         Args: {
