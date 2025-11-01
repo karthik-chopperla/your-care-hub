@@ -44,11 +44,48 @@ const UserDashboard = () => {
   const { user, loading } = useAuth(true);
 
   useEffect(() => {
-    if (user && !loading) {
+    const checkRoleAndLoadData = async () => {
+      if (!user || loading) return;
+      
+      // Check if user is actually a 'user' role, not 'partner'
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (roles?.role === 'partner') {
+        // Redirect partner to their service dashboard
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('service_type')
+          .eq('id', user.id)
+          .single();
+
+        const dashboardMap: Record<string, string> = {
+          'hospital': '/partner/hospital-dashboard',
+          'elder_expert': '/partner/elder-advice-dashboard',
+          'doctor': '/partner/gynecologist-dashboard',
+          'ambulance': '/partner/ambulance-dashboard',
+          'pharmacist': '/partner/medical-shop-dashboard',
+          'price_comparison': '/partner/medical-shop-dashboard',
+          'dietitian': '/partner/restaurant-dashboard',
+          'mental_health': '/partner/mental-health-dashboard',
+          'pregnancy_care': '/partner/gynecologist-dashboard',
+          'fitness': '/partner/fitness-dashboard',
+          'insurance': '/partner/insurance-dashboard',
+        };
+
+        navigate(dashboardMap[profile?.service_type || ''] || '/partner-services', { replace: true });
+        return;
+      }
+
       loadDashboardData(user.id);
       loadUserProfile(user.id);
-    }
-  }, [user, loading]);
+    };
+
+    checkRoleAndLoadData();
+  }, [user, loading, navigate]);
 
   const loadUserProfile = async (userId: string) => {
     const { data } = await supabase
