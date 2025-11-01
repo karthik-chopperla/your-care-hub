@@ -1,10 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, Calendar, AlertTriangle, Pill, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const MobileNavigation = () => {
   const location = useLocation();
+  const [userRole, setUserRole] = useState<'user' | 'partner' | null>(null);
+  
+  useEffect(() => {
+    const checkUserRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        setUserRole(roles?.role as 'user' | 'partner' || null);
+      }
+    };
+    checkUserRole();
+  }, []);
+
+  // Don't show navigation for partners
+  if (userRole === 'partner') {
+    return null;
+  }
   
   const navItems = [
     {
