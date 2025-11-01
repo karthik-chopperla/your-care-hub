@@ -120,7 +120,14 @@ const RoleSelection = () => {
         return;
       }
 
-      // Insert partner role
+      // Get user profile info
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, email, phone_number')
+        .eq('id', session.user.id)
+        .single();
+
+      // Step 1: Insert partner role
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({ 
@@ -130,27 +137,162 @@ const RoleSelection = () => {
 
       if (roleError && !roleError.message.includes('duplicate')) {
         toast({
+          title: "Unable to complete registration",
+          description: "Please verify your service module.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Step 2: Create master partner record
+      const { data: partnerData, error: partnerError } = await supabase
+        .from('partners')
+        .insert({
+          user_id: session.user.id,
+          name: profile?.full_name || 'Partner',
+          service_type: serviceType,
+          email: profile?.email || session.user.email,
+          phone_number: profile?.phone_number
+        })
+        .select('id')
+        .single();
+
+      if (partnerError) {
+        toast({
+          title: "Unable to complete registration",
+          description: "Please verify your service module.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!partnerData) {
+        toast({
           title: "Error",
-          description: roleError.message,
+          description: "Failed to create partner record.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const partnerId = partnerData.id;
+
+      // Step 3: Create service-specific record based on type
+      let serviceError = null;
+      
+      switch (serviceType) {
+        case 'doctor':
+        case 'pregnancy_care':
+          const { error: gynError } = await supabase
+            .from('gynecologists')
+            .insert({
+              partner_id: partnerId,
+              name: profile?.full_name || 'Doctor',
+              email: profile?.email || session.user.email,
+              phone_number: profile?.phone_number,
+              location: {},
+              specialization: []
+            });
+          serviceError = gynError;
+          break;
+
+        case 'mental_health':
+          const { error: mentalError } = await supabase
+            .from('mental_health_partners')
+            .insert({
+              partner_id: partnerId,
+              name: profile?.full_name || 'Mental Health Partner',
+              email: profile?.email || session.user.email,
+              phone_number: profile?.phone_number,
+              location: {},
+              specialization: []
+            });
+          serviceError = mentalError;
+          break;
+
+        case 'fitness':
+          const { error: fitnessError } = await supabase
+            .from('fitness_partners')
+            .insert({
+              partner_id: partnerId,
+              name: profile?.full_name || 'Fitness Partner',
+              email: profile?.email || session.user.email,
+              phone_number: profile?.phone_number,
+              location: {}
+            });
+          serviceError = fitnessError;
+          break;
+
+        case 'home_nursing':
+          const { error: nursingError } = await supabase
+            .from('home_nursing_partners')
+            .insert({
+              partner_id: partnerId,
+              agency_name: profile?.full_name || 'Nursing Agency',
+              email: profile?.email || session.user.email,
+              phone_number: profile?.phone_number,
+              location: {},
+              services_offered: []
+            });
+          serviceError = nursingError;
+          break;
+
+        case 'dietitian':
+        case 'restaurant':
+          const { error: restaurantError } = await supabase
+            .from('restaurant_partners')
+            .insert({
+              partner_id: partnerId,
+              name: profile?.full_name || 'Restaurant Partner',
+              email: profile?.email || session.user.email,
+              phone_number: profile?.phone_number,
+              location: {},
+              cuisine_types: []
+            });
+          serviceError = restaurantError;
+          break;
+
+        case 'insurance':
+          const { error: insuranceError } = await supabase
+            .from('insurance_partners')
+            .insert({
+              partner_id: partnerId,
+              company_name: profile?.full_name || 'Insurance Company',
+              agent_name: profile?.full_name || 'Agent',
+              email: profile?.email || session.user.email,
+              phone_number: profile?.phone_number,
+              location: {},
+              insurance_types: []
+            });
+          serviceError = insuranceError;
+          break;
+
+        case 'elder_expert':
+          // Elder experts table doesn't allow inserts via RLS, skip for now
+          break;
+
+        case 'hospital':
+          // Hospitals are managed separately, skip service-specific insert
+          break;
+      }
+
+      if (serviceError) {
+        // Rollback partner creation if service-specific insert fails
+        await supabase.from('partners').delete().eq('id', partnerId);
+        
+        toast({
+          title: "Unable to complete registration",
+          description: "Please verify your service module.",
           variant: "destructive"
         });
         return;
       }
 
       // Update profile with service type
-      const { error: profileError } = await supabase
+      await supabase
         .from('profiles')
         .update({ service_type: serviceType })
         .eq('id', session.user.id);
-
-      if (profileError) {
-        toast({
-          title: "Error",
-          description: profileError.message,
-          variant: "destructive"
-        });
-        return;
-      }
 
       // Map service type to dashboard route
       const dashboardMap: Record<string, string> = {
@@ -171,7 +313,17 @@ const RoleSelection = () => {
         description: "Partner account created successfully!"
       });
 
-      navigate(dashboardMap[serviceType] || '/partner-services');
+      const dashboardRoute = dashboardMap[serviceType];
+      if (!dashboardRoute) {
+        toast({
+          title: "Error",
+          description: "No valid dashboard assigned. Please select your service type.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      navigate(dashboardRoute);
     } catch (error: any) {
       toast({
         title: "Error",
