@@ -252,6 +252,47 @@ export type Database = {
         }
         Relationships: []
       }
+      elder_advice_requests: {
+        Row: {
+          created_at: string | null
+          elder_id: string
+          id: string
+          question: string
+          replied_at: string | null
+          reply: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          elder_id: string
+          id?: string
+          question: string
+          replied_at?: string | null
+          reply?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          elder_id?: string
+          id?: string
+          question?: string
+          replied_at?: string | null
+          reply?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elder_advice_requests_elder_id_fkey"
+            columns: ["elder_id"]
+            isOneToOne: false
+            referencedRelation: "elder_experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       elder_experts: {
         Row: {
           availability: Json | null
@@ -325,6 +366,95 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elder_remedies: {
+        Row: {
+          condition: string
+          created_at: string | null
+          duration: string
+          elder_id: string
+          id: string
+          ingredients: string[]
+          is_verified: boolean | null
+          preparation_steps: string
+          remedy_name: string
+          safety_notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          condition: string
+          created_at?: string | null
+          duration: string
+          elder_id: string
+          id?: string
+          ingredients: string[]
+          is_verified?: boolean | null
+          preparation_steps: string
+          remedy_name: string
+          safety_notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          condition?: string
+          created_at?: string | null
+          duration?: string
+          elder_id?: string
+          id?: string
+          ingredients?: string[]
+          is_verified?: boolean | null
+          preparation_steps?: string
+          remedy_name?: string
+          safety_notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elder_remedies_elder_id_fkey"
+            columns: ["elder_id"]
+            isOneToOne: false
+            referencedRelation: "elder_experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elder_saved_remedies: {
+        Row: {
+          advice_id: string | null
+          created_at: string | null
+          id: string
+          remedy_id: string | null
+          user_id: string
+        }
+        Insert: {
+          advice_id?: string | null
+          created_at?: string | null
+          id?: string
+          remedy_id?: string | null
+          user_id: string
+        }
+        Update: {
+          advice_id?: string | null
+          created_at?: string | null
+          id?: string
+          remedy_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elder_saved_remedies_advice_id_fkey"
+            columns: ["advice_id"]
+            isOneToOne: false
+            referencedRelation: "elder_advice_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "elder_saved_remedies_remedy_id_fkey"
+            columns: ["remedy_id"]
+            isOneToOne: false
+            referencedRelation: "elder_remedies"
             referencedColumns: ["id"]
           },
         ]
