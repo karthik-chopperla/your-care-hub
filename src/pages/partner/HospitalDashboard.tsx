@@ -11,11 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, DollarSign, Users, Bed, Plus, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HospitalDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const { user, loading: authLoading } = useAuth(true);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -36,21 +38,17 @@ export default function HospitalDashboard() {
   });
 
   useEffect(() => {
-    const healthmateUser = localStorage.getItem("healthmate_user");
-    if (!healthmateUser) {
-      navigate("/auth");
-      return;
-    }
-
-    const userData = JSON.parse(healthmateUser);
-    if (userData.role !== "partner") {
-      navigate("/user-dashboard");
-      return;
-    }
-
-    setUser(userData);
-    loadData(userData.id);
-  }, [navigate]);
+    const checkUserRole = async () => {
+      if (authLoading) return;
+      if (!user) { navigate("/auth"); return; }
+      const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
+      if (roleData?.role !== 'partner') { navigate("/user-dashboard"); return; }
+      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (profileData) setProfile(profileData);
+      loadData(user.id);
+    };
+    checkUserRole();
+  }, [user, authLoading, navigate]);
 
   const loadData = async (userId: string) => {
     setLoading(true);
@@ -494,11 +492,11 @@ export default function HospitalDashboard() {
       <CardContent className="space-y-4">
         <div>
           <Label>Partner Name</Label>
-          <Input value={user?.full_name || ""} disabled />
+          <Input value={profile?.full_name || ""} disabled />
         </div>
         <div>
           <Label>Phone Number</Label>
-          <Input value={user?.phone_number || ""} disabled />
+          <Input value={profile?.phone_number || ""} disabled />
         </div>
         <div>
           <Label>Email</Label>
