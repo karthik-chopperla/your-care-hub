@@ -21,6 +21,13 @@ import PregnancyCarePage from "./pages/PregnancyCarePage";
 import HomeNursingPage from "./pages/HomeNursingPage";
 import MentalHealthPage from "./pages/MentalHealthPage";
 import InsurancePage from "./pages/InsurancePage";
+import HomeRemediesPage from "./pages/HomeRemediesPage";
+import DietPlansPage from "./pages/DietPlansPage";
+import FitnessRecoveryPage from "./pages/FitnessRecoveryPage";
+import MyRecordsPage from "./pages/MyRecordsPage";
+import AIChatbotPage from "./pages/AIChatbotPage";
+import FindFoodPage from "./pages/FindFoodPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 import HospitalDataPage from "./pages/partner/HospitalDataPage";
 import SOSAlertsPage from "./pages/partner/SOSAlertsPage";
 import AppointmentsPage from "./pages/partner/AppointmentsPage";
@@ -60,6 +67,13 @@ const App = () => {
             <Route path="/reminders" element={<MedicineRemindersPage />} />
             <Route path="/all-services" element={<AllServicesPage />} />
             <Route path="/medical-shop" element={<MedicalShopPage />} />
+            <Route path="/home-remedies" element={<HomeRemediesPage />} />
+            <Route path="/diet-plans" element={<DietPlansPage />} />
+            <Route path="/fitness-recovery" element={<FitnessRecoveryPage />} />
+            <Route path="/my-records" element={<MyRecordsPage />} />
+            <Route path="/ai-chatbot" element={<AIChatbotPage />} />
+            <Route path="/find-food" element={<FindFoodPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/partner-services" element={<PartnerServicesList />} />
             <Route path="/partner/hospital-dashboard" element={<HospitalDashboard />} />
             <Route path="/partner/gynecologist-dashboard" element={<GynecologistDashboard />} />
@@ -78,13 +92,7 @@ const App = () => {
             <Route path="/mental-health" element={<MentalHealthPage />} />
             <Route path="/pregnancy-care" element={<PregnancyCarePage />} />
             <Route path="/home-nursing" element={<HomeNursingPage />} />
-            <Route path="/diet-plans" element={<DoctorsPage />} />
-            <Route path="/fitness" element={<DoctorsPage />} />
             <Route path="/insurance" element={<InsurancePage />} />
-            <Route path="/home-nursing" element={<HomeNursingPage />} />
-            <Route path="/diet-plans" element={<DoctorsPage />} />
-            <Route path="/fitness" element={<DoctorsPage />} />
-            <Route path="/insurance" element={<DoctorsPage />} />
             <Route path="/bookings" element={<DoctorsPage />} />
             <Route path="/profile" element={<UserDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
