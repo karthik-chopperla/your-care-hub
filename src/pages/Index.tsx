@@ -33,9 +33,15 @@ const Index = () => {
           .eq('user_id', session.user.id)
           .single();
 
-        if (roles?.role === 'user') {
+        // If no role assigned, redirect to role selection
+        if (!roles?.role) {
+          navigate('/role-selection', { replace: true });
+          return;
+        }
+
+        if (roles.role === 'user') {
           navigate('/user-dashboard', { replace: true });
-        } else if (roles?.role === 'partner') {
+        } else if (roles.role === 'partner') {
           const { data: profile } = await supabase
             .from('profiles')
             .select('service_type')

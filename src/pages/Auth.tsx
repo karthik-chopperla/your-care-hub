@@ -33,33 +33,37 @@ const Auth = () => {
           .eq('user_id', session.user.id)
           .single();
         
-        if (roles?.role) {
-          if (roles.role === 'user') {
-            navigate('/user-dashboard', { replace: true });
-          } else if (roles.role === 'partner') {
-            // Get partner's service type and redirect to specific dashboard
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('service_type')
-              .eq('id', session.user.id)
-              .single();
+        // If no role assigned, redirect to role selection
+        if (!roles?.role) {
+          navigate('/role-selection', { replace: true });
+          return;
+        }
+        
+        if (roles.role === 'user') {
+          navigate('/user-dashboard', { replace: true });
+        } else if (roles.role === 'partner') {
+          // Get partner's service type and redirect to specific dashboard
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('service_type')
+            .eq('id', session.user.id)
+            .single();
 
-            const dashboardMap: Record<string, string> = {
-              'hospital': '/partner/hospital-dashboard',
-              'elder_expert': '/partner/elder-advice-dashboard',
-              'doctor': '/partner/gynecologist-dashboard',
-              'ambulance': '/partner/ambulance-dashboard',
-              'pharmacist': '/partner/medical-shop-dashboard',
-              'price_comparison': '/partner/medical-shop-dashboard',
-              'dietitian': '/partner/restaurant-dashboard',
-              'mental_health': '/partner/mental-health-dashboard',
-              'pregnancy_care': '/partner/gynecologist-dashboard',
-              'fitness': '/partner/fitness-dashboard',
-              'insurance': '/partner/insurance-dashboard',
-            };
+          const dashboardMap: Record<string, string> = {
+            'hospital': '/partner/hospital-dashboard',
+            'elder_expert': '/partner/elder-advice-dashboard',
+            'doctor': '/partner/gynecologist-dashboard',
+            'ambulance': '/partner/ambulance-dashboard',
+            'pharmacist': '/partner/medical-shop-dashboard',
+            'price_comparison': '/partner/medical-shop-dashboard',
+            'dietitian': '/partner/restaurant-dashboard',
+            'mental_health': '/partner/mental-health-dashboard',
+            'pregnancy_care': '/partner/gynecologist-dashboard',
+            'fitness': '/partner/fitness-dashboard',
+            'insurance': '/partner/insurance-dashboard',
+          };
 
-            navigate(dashboardMap[profile?.service_type || ''] || '/partner-services', { replace: true });
-          }
+          navigate(dashboardMap[profile?.service_type || ''] || '/partner-services', { replace: true });
         }
       }
     };
@@ -222,9 +226,15 @@ const Auth = () => {
           .eq('user_id', data.user.id)
           .single();
 
-        if (roles?.role === 'user') {
+        // If no role assigned, redirect to role selection
+        if (!roles?.role) {
+          navigate('/role-selection');
+          return;
+        }
+
+        if (roles.role === 'user') {
           navigate('/user-dashboard');
-        } else if (roles?.role === 'partner') {
+        } else if (roles.role === 'partner') {
           // Get partner's service type and redirect to specific dashboard
           const { data: profile } = await supabase
             .from('profiles')
@@ -247,8 +257,6 @@ const Auth = () => {
           };
 
           navigate(dashboardMap[profile?.service_type || ''] || '/partner-services');
-        } else {
-          navigate('/user-dashboard');
         }
       }
     } catch (error: any) {
