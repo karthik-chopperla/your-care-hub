@@ -46,16 +46,15 @@ const RoleSelection = () => {
 
   const partnerTypes = [
     { id: 'hospital', name: 'Hospital Partner', icon: Hospital, description: 'Manage hospital info, beds, costs' },
-    { id: 'elder_expert', name: 'Elder Expert', icon: Users, description: 'Traditional advice & guidance' },
-    { id: 'doctor', name: 'Doctor', icon: Stethoscope, description: 'Consultations & appointments' },
-    { id: 'ambulance', name: 'Emergency Services', icon: Ambulance, description: 'SOS alerts & response' },
-    { id: 'pharmacist', name: 'Pharmacist', icon: Pill, description: 'Medicine catalog & reminders' },
-    { id: 'price_comparison', name: 'Price Comparison', icon: DollarSign, description: 'Medicine pricing updates' },
-    { id: 'dietitian', name: 'Dietitian/Food Provider', icon: Utensils, description: 'Diet plans & meal orders' },
-    { id: 'mental_health', name: 'Mental Health', icon: Brain, description: 'Sessions & nursing care' },
-    { id: 'pregnancy_care', name: 'Pregnancy Care', icon: Baby, description: 'Care guidance & checkups' },
-    { id: 'fitness', name: 'Fitness Partner', icon: Dumbbell, description: 'Workout sessions & tracking' },
-    { id: 'insurance', name: 'Insurance Partner', icon: Shield, description: 'Policies & claims management' },
+    { id: 'doctor', name: 'Doctor Partner', icon: Stethoscope, description: 'Consultations & appointments' },
+    { id: 'elder_expert', name: 'Elder / Expert', icon: Users, description: 'Home remedies & traditional guidance' },
+    { id: 'dietitian', name: 'Dietitian', icon: Utensils, description: 'Personalized diet & nutrition plans' },
+    { id: 'restaurant', name: 'Food Provider / Restaurant', icon: Utensils, description: 'Healthy meal preparation & delivery' },
+    { id: 'mental_health', name: 'Mental Health Partner', icon: Brain, description: 'Counseling sessions & support' },
+    { id: 'pregnancy_care', name: 'Pregnancy Care Partner', icon: Baby, description: 'Maternity care & guidance' },
+    { id: 'fitness', name: 'Fitness Partner', icon: Dumbbell, description: 'Workout plans & training sessions' },
+    { id: 'home_nursing', name: 'Home Nursing Partner', icon: Hospital, description: 'In-home nursing care services' },
+    { id: 'insurance', name: 'Health Insurance Partner', icon: Shield, description: 'Insurance plans & claims' },
   ];
 
   const handleRoleSelection = async (role: 'user' | 'partner') => {
@@ -156,15 +155,14 @@ const RoleSelection = () => {
       // Map service type to dashboard route
       const dashboardMap: Record<string, string> = {
         'hospital': '/partner/hospital-dashboard',
-        'elder_expert': '/partner/elder-advice-dashboard',
         'doctor': '/partner/gynecologist-dashboard',
-        'ambulance': '/partner/ambulance-dashboard',
-        'pharmacist': '/partner/medical-shop-dashboard',
-        'price_comparison': '/partner/medical-shop-dashboard',
+        'elder_expert': '/partner/elder-advice-dashboard',
         'dietitian': '/partner/restaurant-dashboard',
+        'restaurant': '/partner/restaurant-dashboard',
         'mental_health': '/partner/mental-health-dashboard',
         'pregnancy_care': '/partner/gynecologist-dashboard',
         'fitness': '/partner/fitness-dashboard',
+        'home_nursing': '/partner/home-nursing-dashboard',
         'insurance': '/partner/insurance-dashboard',
       };
 
