@@ -21,59 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Index = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkUserStatus = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        // Check user's role
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-
-        // If no role assigned, redirect to role selection
-        if (!roles?.role) {
-          navigate('/role-selection', { replace: true });
-          return;
-        }
-
-        if (roles.role === 'user') {
-          navigate('/user-dashboard', { replace: true });
-        } else if (roles.role === 'partner') {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('service_type')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profile?.service_type) {
-            // Map service type to dashboard route
-            const dashboardMap: Record<string, string> = {
-              'hospital': '/partner/hospital-dashboard',
-              'elder_expert': '/partner/elder-advice-dashboard',
-              'doctor': '/partner/gynecologist-dashboard',
-              'ambulance': '/partner/ambulance-dashboard',
-              'pharmacist': '/partner/medical-shop-dashboard',
-              'price_comparison': '/partner/medical-shop-dashboard',
-              'dietitian': '/partner/restaurant-dashboard',
-              'mental_health': '/partner/mental-health-dashboard',
-              'pregnancy_care': '/partner/gynecologist-dashboard',
-              'fitness': '/partner/fitness-dashboard',
-              'insurance': '/partner/insurance-dashboard',
-            };
-            
-            navigate(dashboardMap[profile.service_type] || '/partner-services', { replace: true });
-          } else {
-            navigate('/role-selection', { replace: true });
-          }
-        }
-      }
-    };
-
-    checkUserStatus();
-  }, [navigate]);
+  // No automatic redirects - homepage is always shown first
   const features = [
     {
       icon: <Stethoscope className="h-6 w-6 text-primary" />,

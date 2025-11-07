@@ -23,51 +23,11 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Check if already logged in but don't auto-redirect
+  // Users can manually go to homepage if they want
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        // If no role assigned, redirect to role selection
-        if (!roles?.role) {
-          navigate('/role-selection', { replace: true });
-          return;
-        }
-        
-        if (roles.role === 'user') {
-          navigate('/user-dashboard', { replace: true });
-        } else if (roles.role === 'partner') {
-          // Get partner's service type and redirect to specific dashboard
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('service_type')
-            .eq('id', session.user.id)
-            .single();
-
-          const dashboardMap: Record<string, string> = {
-            'hospital': '/partner/hospital-dashboard',
-            'elder_expert': '/partner/elder-advice-dashboard',
-            'doctor': '/partner/gynecologist-dashboard',
-            'ambulance': '/partner/ambulance-dashboard',
-            'pharmacist': '/partner/medical-shop-dashboard',
-            'price_comparison': '/partner/medical-shop-dashboard',
-            'dietitian': '/partner/restaurant-dashboard',
-            'mental_health': '/partner/mental-health-dashboard',
-            'pregnancy_care': '/partner/gynecologist-dashboard',
-            'fitness': '/partner/fitness-dashboard',
-            'insurance': '/partner/insurance-dashboard',
-          };
-
-          navigate(dashboardMap[profile?.service_type || ''] || '/partner-services', { replace: true });
-        }
-      }
-    };
-    checkUser();
+    // Optional: You can show a message if user is already logged in
+    // but don't force redirect - let them use the auth page if they want
   }, [navigate]);
 
   const [signupData, setSignupData] = useState({

@@ -15,11 +15,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const InsurancePage = () => {
-  const [userInfo, setUserInfo] = useState(null);
-  const [insurancePartners, setInsurancePartners] = useState([]);
-  const [insurancePlans, setInsurancePlans] = useState([]);
-  const [claims, setClaims] = useState([]);
-  const [documents, setDocuments] = useState([]);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [insurancePartners, setInsurancePartners] = useState<any[]>([]);
+  const [insurancePlans, setInsurancePlans] = useState<any[]>([]);
+  const [claims, setClaims] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -75,6 +75,7 @@ const InsurancePage = () => {
 
   const loadInsurancePartners = async () => {
     try {
+      // @ts-ignore - Type inference issue with complex queries
       const { data, error } = await supabase
         .from('insurance_partners')
         .select('*')
