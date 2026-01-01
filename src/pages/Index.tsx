@@ -58,8 +58,7 @@ const Index = () => {
   const stats = [
     { number: "50K+", label: "Registered Users" },
     { number: "1000+", label: "Verified Doctors" },
-    { number: "500+", label: "Partner Hospitals" },
-    { number: "24/7", label: "Emergency Support" }
+    { number: "500+", label: "Partner Hospitals" }
   ];
 
   return (
