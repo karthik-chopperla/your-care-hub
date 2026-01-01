@@ -693,6 +693,7 @@ export type Database = {
           icu_beds: number | null
           id: string
           name: string
+          partner_id: string | null
           phone_number: string | null
           pincode: string | null
           ratings: number | null
@@ -715,6 +716,7 @@ export type Database = {
           icu_beds?: number | null
           id?: string
           name: string
+          partner_id?: string | null
           phone_number?: string | null
           pincode?: string | null
           ratings?: number | null
@@ -737,6 +739,7 @@ export type Database = {
           icu_beds?: number | null
           id?: string
           name?: string
+          partner_id?: string | null
           phone_number?: string | null
           pincode?: string | null
           ratings?: number | null
@@ -745,7 +748,15 @@ export type Database = {
           total_ratings?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hospitals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       insurance_partners: {
         Row: {
