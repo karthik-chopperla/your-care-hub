@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import RoleSelection from "./pages/RoleSelection";
+import PartnerServiceSetup from "./pages/PartnerServiceSetup";
 import UserDashboard from "./pages/UserDashboard";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import Dashboard from "./pages/Dashboard";
@@ -56,6 +57,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/role-selection" element={<RoleSelection />} />
+            <Route path="/partner-service-setup" element={<PartnerServiceSetup />} />
             <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/partner-dashboard" element={<PartnerDashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />

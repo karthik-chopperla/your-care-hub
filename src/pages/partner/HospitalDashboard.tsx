@@ -18,6 +18,7 @@ export default function HospitalDashboard() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth(true);
   const [profile, setProfile] = useState<any>(null);
+  const [partnerId, setPartnerId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -45,25 +46,39 @@ export default function HospitalDashboard() {
       if (roleData?.role !== 'partner') { navigate("/user-dashboard"); return; }
       const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       if (profileData) setProfile(profileData);
-      loadData(user.id);
+      
+      // Get partner record to filter hospitals
+      const { data: partnerData } = await supabase
+        .from('partners')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (partnerData) {
+        setPartnerId(partnerData.id);
+        loadData(user.id, partnerData.id);
+      } else {
+        setLoading(false);
+      }
     };
     checkUserRole();
   }, [user, authLoading, navigate]);
 
-  const loadData = async (userId: string) => {
+  const loadData = async (userId: string, partId: string) => {
     setLoading(true);
     await Promise.all([
-      loadHospitals(userId),
+      loadHospitals(partId),
       loadBookings(userId),
       loadNotifications(userId)
     ]);
     setLoading(false);
   };
 
-  const loadHospitals = async (userId: string) => {
+  const loadHospitals = async (partId: string) => {
     const { data, error } = await supabase
       .from("hospitals")
       .select("*")
+      .eq("partner_id", partId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -104,10 +119,14 @@ export default function HospitalDashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !partnerId) {
+      toast({ title: "Partner profile not found", variant: "destructive" });
+      return;
+    }
 
     const hospitalData = {
       ...formData,
+      partner_id: partnerId,
       location: { lat: 0, lng: 0 },
       coordinates: { lat: 0, lng: 0 }
     };
@@ -115,7 +134,7 @@ export default function HospitalDashboard() {
     if (editingId) {
       const { error } = await supabase
         .from("hospitals")
-        .update(hospitalData)
+        .update(formData)
         .eq("id", editingId);
 
       if (error) {
@@ -123,7 +142,7 @@ export default function HospitalDashboard() {
       } else {
         toast({ title: "Hospital updated successfully" });
         resetForm();
-        loadHospitals(user.id);
+        loadHospitals(partnerId);
       }
     } else {
       const { error } = await supabase
@@ -135,7 +154,7 @@ export default function HospitalDashboard() {
       } else {
         toast({ title: "Hospital added successfully" });
         resetForm();
-        loadHospitals(user.id);
+        loadHospitals(partnerId);
       }
     }
   };
@@ -158,6 +177,8 @@ export default function HospitalDashboard() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!partnerId) return;
+    
     const { error } = await supabase
       .from("hospitals")
       .delete()
@@ -167,7 +188,7 @@ export default function HospitalDashboard() {
       toast({ title: "Error deleting hospital", variant: "destructive" });
     } else {
       toast({ title: "Hospital deleted successfully" });
-      loadHospitals(user.id);
+      loadHospitals(partnerId);
     }
   };
 
