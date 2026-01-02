@@ -69,20 +69,44 @@ const SOSPage = () => {
 
           setSosEvent(sosData);
 
+          // Get all ambulance partners to notify them
+          const { data: ambulancePartners } = await supabase
+            .from('ambulance_partners')
+            .select('partner_id')
+            .eq('is_available', true);
+
           // Create notifications for all ambulance partners
+          if (ambulancePartners && ambulancePartners.length > 0) {
+            const partnerNotifications = ambulancePartners
+              .filter(p => p.partner_id)
+              .map(partner => ({
+                partner_id: partner.partner_id,
+                type: 'sos',
+                title: '🚨 NEW SOS EMERGENCY',
+                message: `Emergency request from ${userInfo.full_name || 'a user'}. Location: ${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}. Respond immediately!`,
+              }));
+
+            if (partnerNotifications.length > 0) {
+              await supabase
+                .from('partner_notifications')
+                .insert(partnerNotifications);
+            }
+          }
+
+          // Also create a notification for the user
           await supabase
             .from('notifications')
             .insert({
               user_id: userInfo.id,
               type: 'sos',
-              title: '🚨 EMERGENCY SOS ALERT',
-              message: `Emergency request from ${userInfo.full_name}. Location: ${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
-              action_url: '/partner/sos-alerts'
+              title: '🚨 SOS Alert Sent',
+              message: `Your emergency request has been sent to ${ambulancePartners?.length || 0} nearby ambulance services. Stay calm, help is on the way.`,
+              action_url: '/sos'
             });
 
           toast({
             title: "SOS Alert Sent!",
-            description: "Emergency services have been notified. Stay calm, help is on the way.",
+            description: `Emergency services have been notified (${ambulancePartners?.length || 0} ambulances). Stay calm, help is on the way.`,
           });
 
           // Subscribe to updates
