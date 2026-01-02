@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,11 +10,96 @@ import {
   Stethoscope, 
   MapPin, 
   Pill,
-  User
+  User,
+  Phone
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [sosLoading, setSosLoading] = useState(false);
+
+  const handleQuickSOS = async () => {
+    setSosLoading(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const locationData = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          timestamp: new Date().toISOString()
+        };
+
+        try {
+          const userInfo = JSON.parse(localStorage.getItem('healthmate_user') || '{}');
+          
+          if (!userInfo.id) {
+            toast({
+              title: "Please login first",
+              description: "You need to be logged in to send SOS alerts",
+              variant: "destructive"
+            });
+            navigate('/auth');
+            return;
+          }
+          
+          // Create SOS event
+          const { data: sosData, error: sosError } = await supabase
+            .from('sos_events')
+            .insert({
+              user_id: userInfo.id,
+              location: locationData,
+              status: 'initiated',
+              notes: 'Emergency assistance requested via quick SOS'
+            })
+            .select()
+            .single();
+
+          if (sosError) throw sosError;
+
+          // Create notification for the user
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: userInfo.id,
+              type: 'sos',
+              title: '🚨 EMERGENCY SOS ALERT SENT',
+              message: `Your emergency request has been sent. Location: ${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}. Help is on the way.`,
+              action_url: '/sos'
+            });
+
+          toast({
+            title: "🚨 SOS Alert Sent!",
+            description: "Emergency services have been notified. Redirecting to tracking...",
+          });
+
+          // Navigate to SOS page to track
+          setTimeout(() => navigate('/sos'), 1000);
+        } catch (error) {
+          console.error('SOS Error:', error);
+          toast({
+            title: "SOS Alert Failed",
+            description: "Please try again or call emergency services directly",
+            variant: "destructive"
+          });
+        } finally {
+          setSosLoading(false);
+        }
+      },
+      (error) => {
+        console.error('Location Error:', error);
+        toast({
+          title: "Location Access Required",
+          description: "Please enable location services and try again",
+          variant: "destructive"
+        });
+        setSosLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const quickActions = [
     {
@@ -165,6 +250,39 @@ export default function Dashboard() {
           </Card>
         </div>
       </main>
+
+      {/* Floating SOS Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={handleQuickSOS}
+          disabled={sosLoading}
+          size="lg"
+          className="h-16 w-16 rounded-full bg-destructive hover:bg-destructive/90 shadow-lg animate-pulse hover:animate-none"
+        >
+          {sosLoading ? (
+            <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full" />
+          ) : (
+            <AlertTriangle className="h-8 w-8 text-white" />
+          )}
+        </Button>
+        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-destructive text-white text-xs px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
+          SOS
+        </span>
+      </div>
+
+      {/* Emergency call option */}
+      <div className="fixed bottom-6 left-6 z-50">
+        <a href="tel:108">
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-14 px-4 rounded-full border-destructive text-destructive hover:bg-destructive hover:text-white shadow-lg"
+          >
+            <Phone className="h-5 w-5 mr-2" />
+            Call 108
+          </Button>
+        </a>
+      </div>
     </div>
   );
 }
