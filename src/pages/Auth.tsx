@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { CountrySelector } from "@/components/CountrySelector";
-import { countries } from "@/data/countries";
+import { countries, Country } from "@/data/countries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -43,6 +43,10 @@ const Auth = () => {
     identifier: '', // email or phone
     password: ''
   });
+
+  const [loginCountry, setLoginCountry] = useState<Country>(
+    countries.find(c => c.dialCode === '+91') || countries[0]
+  );
 
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
@@ -149,16 +153,8 @@ const Auth = () => {
           throw new Error("Phone number must be 8-15 digits");
         }
 
-        // First check if we can find the country code from profiles
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('country_code')
-          .eq('phone_number', loginData.identifier)
-          .single();
-
-        // Use the stored country code or default to +91 (most common for this app)
-        const countryCode = profile?.country_code || '+91';
-        email = `${countryCode}${loginData.identifier}@phone.healthmate.app`;
+        // Use the country code from the login form
+        email = `${loginCountry.dialCode}${loginData.identifier}@phone.healthmate.app`;
       } else {
         if (!validateEmail(loginData.identifier)) {
           throw new Error("Please enter a valid email address");
@@ -348,6 +344,16 @@ const Auth = () => {
                       </div>
                     </RadioGroup>
                   </div>
+
+                  {loginMethod === 'phone' && (
+                    <div className="space-y-2">
+                      <Label className="text-base">Country Code</Label>
+                      <CountrySelector
+                        selectedCountry={loginCountry}
+                        onSelectCountry={setLoginCountry}
+                      />
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="loginIdentifier" className="text-base">
