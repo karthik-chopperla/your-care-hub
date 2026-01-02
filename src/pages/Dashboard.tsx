@@ -251,23 +251,27 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Floating SOS Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating SOS Button - More Prominent */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-2">
+        <span className="bg-destructive text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg animate-bounce">
+          🚨 SOS
+        </span>
         <Button
           onClick={handleQuickSOS}
           disabled={sosLoading}
           size="lg"
-          className="h-16 w-16 rounded-full bg-destructive hover:bg-destructive/90 shadow-lg animate-pulse hover:animate-none"
+          className="h-20 w-20 rounded-full bg-destructive hover:bg-destructive/90 shadow-2xl border-4 border-white"
+          style={{
+            animation: sosLoading ? 'none' : 'pulse 2s infinite',
+            boxShadow: '0 0 20px rgba(220, 38, 38, 0.5), 0 8px 32px rgba(0,0,0,0.3)'
+          }}
         >
           {sosLoading ? (
-            <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-3 border-white border-t-transparent rounded-full" />
           ) : (
-            <AlertTriangle className="h-8 w-8 text-white" />
+            <AlertTriangle className="h-10 w-10 text-white" />
           )}
         </Button>
-        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-destructive text-white text-xs px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
-          SOS
-        </span>
       </div>
 
       {/* Emergency call option */}
