@@ -1553,42 +1553,57 @@ export type Database = {
           ambulance_location: Json | null
           ambulance_tracking_id: string | null
           created_at: string
+          driver_name: string | null
+          driver_phone: string | null
           estimated_arrival: string | null
           hospital_id: string | null
           id: string
           location: Json
           notes: string | null
           status: string | null
+          symptoms: string | null
           updated_at: string
           user_id: string
+          vehicle_number: string | null
+          vehicle_type: string | null
         }
         Insert: {
           actual_arrival?: string | null
           ambulance_location?: Json | null
           ambulance_tracking_id?: string | null
           created_at?: string
+          driver_name?: string | null
+          driver_phone?: string | null
           estimated_arrival?: string | null
           hospital_id?: string | null
           id?: string
           location: Json
           notes?: string | null
           status?: string | null
+          symptoms?: string | null
           updated_at?: string
           user_id: string
+          vehicle_number?: string | null
+          vehicle_type?: string | null
         }
         Update: {
           actual_arrival?: string | null
           ambulance_location?: Json | null
           ambulance_tracking_id?: string | null
           created_at?: string
+          driver_name?: string | null
+          driver_phone?: string | null
           estimated_arrival?: string | null
           hospital_id?: string | null
           id?: string
           location?: Json
           notes?: string | null
           status?: string | null
+          symptoms?: string | null
           updated_at?: string
           user_id?: string
+          vehicle_number?: string | null
+          vehicle_type?: string | null
         }
         Relationships: [
           {

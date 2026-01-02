@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Ambulance, DollarSign, AlertCircle, CheckCircle } from "lucide-react";
+import { Ambulance, DollarSign, AlertCircle, CheckCircle, Bell } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AmbulanceDashboard() {
@@ -127,43 +127,71 @@ export default function AmbulanceDashboard() {
       title="Emergency SOS Dashboard"
       subtitle="Manage ambulance services and SOS requests"
       overviewContent={
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
-              <Ambulance className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+        <div className="space-y-6">
+          {/* SOS Alerts Button - Prominent */}
+          <Card className="border-destructive/50 bg-gradient-to-r from-destructive/10 to-destructive/5">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-full bg-destructive/20 flex items-center justify-center animate-pulse">
+                    <Bell className="h-7 w-7 text-destructive" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-destructive">SOS Alerts Center</h3>
+                    <p className="text-sm text-muted-foreground">View and respond to emergency requests</p>
+                  </div>
+                </div>
+                <Button 
+                  size="lg" 
+                  className="bg-destructive hover:bg-destructive/90"
+                  onClick={() => navigate('/partner/sos-alerts')}
+                >
+                  <AlertCircle className="h-5 w-5 mr-2" />
+                  View SOS Alerts
+                </Button>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active SOS</CardTitle>
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeSOS}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">₹{stats.totalRevenue}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed Cases</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.completedCases}</div>
-            </CardContent>
-          </Card>
+
+          {/* Stats Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
+                <Ambulance className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active SOS</CardTitle>
+                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.activeSOS}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₹{stats.totalRevenue}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed Cases</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.completedCases}</div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       }
       dataManagerContent={
