@@ -143,29 +143,22 @@ const Auth = () => {
     try {
       let email = loginData.identifier;
 
-      // If login method is phone, lookup email from profiles
+      // If login method is phone, construct the email format used during signup
       if (loginMethod === 'phone') {
         if (!validatePhone(loginData.identifier)) {
           throw new Error("Phone number must be 8-15 digits");
         }
 
-        const { data: profile, error: profileError } = await supabase
+        // First check if we can find the country code from profiles
+        const { data: profile } = await supabase
           .from('profiles')
-          .select('email, id')
+          .select('country_code')
           .eq('phone_number', loginData.identifier)
           .single();
 
-        if (profileError || !profile) {
-          throw new Error("No account found with this phone number");
-        }
-
-        // Get the auth user's email
-        const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
-        if (authUser?.user?.email) {
-          email = authUser.user.email;
-        } else {
-          email = `${loginData.identifier}@phone.healthmate.app`;
-        }
+        // Use the stored country code or default to +91 (most common for this app)
+        const countryCode = profile?.country_code || '+91';
+        email = `${countryCode}${loginData.identifier}@phone.healthmate.app`;
       } else {
         if (!validateEmail(loginData.identifier)) {
           throw new Error("Please enter a valid email address");
