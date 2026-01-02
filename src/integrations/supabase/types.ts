@@ -459,6 +459,50 @@ export type Database = {
           },
         ]
       }
+      emergency_contacts: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          notify_on_sos: boolean | null
+          phone_number: string
+          relationship: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          notify_on_sos?: boolean | null
+          phone_number: string
+          relationship?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          notify_on_sos?: boolean | null
+          phone_number?: string
+          relationship?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_contacts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fitness_partners: {
         Row: {
           address: string | null
@@ -1506,6 +1550,7 @@ export type Database = {
       sos_events: {
         Row: {
           actual_arrival: string | null
+          ambulance_location: Json | null
           ambulance_tracking_id: string | null
           created_at: string
           estimated_arrival: string | null
@@ -1519,6 +1564,7 @@ export type Database = {
         }
         Insert: {
           actual_arrival?: string | null
+          ambulance_location?: Json | null
           ambulance_tracking_id?: string | null
           created_at?: string
           estimated_arrival?: string | null
@@ -1532,6 +1578,7 @@ export type Database = {
         }
         Update: {
           actual_arrival?: string | null
+          ambulance_location?: Json | null
           ambulance_tracking_id?: string | null
           created_at?: string
           estimated_arrival?: string | null
