@@ -375,12 +375,12 @@ const UserDashboard = () => {
             </div>
             {/* SOS Button */}
             <Button
-              onClick={handleSOS}
-              disabled={sosActive}
-              className={`${sosActive ? 'bg-urgent' : 'bg-urgent hover:bg-urgent/90'} text-white font-bold px-4 py-2 rounded-xl shadow-floating shrink-0`}
+              onClick={() => navigate('/sos')}
+              className="bg-urgent hover:bg-urgent/90 text-white font-bold px-4 py-2 rounded-xl shadow-floating shrink-0"
               size="sm"
             >
-              <AlertTriangle className="h-5 w-5" />
+              <AlertTriangle className="h-5 w-5 mr-1" />
+              SOS
             </Button>
           </div>
           <Badge className={`${subscriptionPlans.find(p => p.name === currentPlan)?.color} text-white px-3 py-1`}>
